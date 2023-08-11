@@ -13,12 +13,12 @@ public class mapGeneratorEditor : Editor
         if (DrawDefaultInspector())
             if (mapGen.autoUpdate)
             {
-                mapGen.generateMap(); //if the map gen variables have been altered, generate map
+                mapGen.DrawMapInEditor(); //if the map gen variables have been altered, generate map
             }
 
         if (GUILayout.Button("Generate"))
         {
-            mapGen.generateMap(); //if Generate button is pressed, generate map
+            mapGen.DrawMapInEditor(); //if Generate button is pressed, generate map
         }
     }
 }
