@@ -12,7 +12,8 @@ public class mapGenerator : MonoBehaviour
 
     public noise.NormalizeMode normalizeMode;
 
-    public const int mapChunkSize = 241;
+    public bool useFlatShading;
+
     [Range(0,6)]
     public int editorPreviewLOD;
     public float noiseScale;
@@ -33,6 +34,7 @@ public class mapGenerator : MonoBehaviour
     public bool autoUpdate;
 
     public TerrainType[] regions;
+    static mapGenerator instance;
 
     float[,] falloffMap;
 
@@ -44,18 +46,36 @@ public class mapGenerator : MonoBehaviour
         falloffMap = falloffGenerator.generateFalloffMap(mapChunkSize);
     }
 
+    public static int mapChunkSize
+    {
+        get
+        {
+            if (instance == null)
+                instance = FindObjectOfType<mapGenerator>();
+
+            if (instance.useFlatShading)
+            {
+                return 95;
+            }
+            else
+            {
+                return 239;
+            }
+        }
+    }
+
     public void DrawMapInEditor()
     {
-        MapData mapData = generateMapData(Vector2.zero);
+        MapData mapData = GenerateMapData(Vector2.zero);
         mapDisplay display = FindObjectOfType<mapDisplay>(); //sets display to object with mapDisplay script
         if (drawMode == DrawMode.NoiseMap)
-            display.drawTexture(textureGenerator.TextureFromHeightMap(mapData.heightMap));
+            display.DrawTexture(textureGenerator.TextureFromHeightMap(mapData.heightMap));
         else if (drawMode == DrawMode.ColourMap)
-            display.drawTexture(textureGenerator.TextureFromColourMap(mapData.colourMap, mapChunkSize, mapChunkSize));
+            display.DrawTexture(textureGenerator.TextureFromColourMap(mapData.colourMap, mapChunkSize, mapChunkSize));
         else if (drawMode == DrawMode.Mesh)
-            display.DrawMesh(meshGenerator.generateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD), textureGenerator.TextureFromColourMap(mapData.colourMap, mapChunkSize, mapChunkSize));
+            display.DrawMesh(meshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD, useFlatShading), textureGenerator.TextureFromColourMap(mapData.colourMap, mapChunkSize, mapChunkSize));
         else if (drawMode == DrawMode.FalloffMap)
-            display.drawTexture(textureGenerator.TextureFromHeightMap(falloffGenerator.generateFalloffMap(mapChunkSize)));
+            display.DrawTexture(textureGenerator.TextureFromHeightMap(falloffGenerator.generateFalloffMap(mapChunkSize)));
     }
 
     public void RequestMapData(Vector2 centre, Action<MapData> callback)
@@ -70,7 +90,7 @@ public class mapGenerator : MonoBehaviour
 
     void MapDataThread(Vector2 centre, Action<MapData> callback)
     {
-        MapData mapData = generateMapData(centre);
+        MapData mapData = GenerateMapData(centre);
         lock (mapDataThreadInfoQueue) //thread can only be executed one at a time
         {
             mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData)); //add new threading task to queue
@@ -90,7 +110,7 @@ public class mapGenerator : MonoBehaviour
 
     void MeshDataThread(MapData mapData, int lod, Action<MeshData> callback)
     {
-        MeshData meshData = meshGenerator.generateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, lod);
+        MeshData meshData = meshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, lod, useFlatShading);
         lock (meshDataThreadInfoQueue) //thread can only be executed one at a time
         {
             meshDataThreadInfoQueue.Enqueue (new MapThreadInfo<MeshData>(callback, meshData)); //add new threading task to queue
@@ -118,9 +138,9 @@ public class mapGenerator : MonoBehaviour
         }
     }
 
-    MapData generateMapData(Vector2 centre)
+    MapData GenerateMapData(Vector2 centre)
     {
-        float[,] noiseMap = noise.generateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, centre + offset, normalizeMode); //pass variables into noise generation function
+        float[,] noiseMap = noise.generateNoiseMap(mapChunkSize+2, mapChunkSize+2, seed, noiseScale, octaves, persistance, lacunarity, centre + offset, normalizeMode); //pass variables into noise generation function
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
         for (int y = 0; y < mapChunkSize; y++)

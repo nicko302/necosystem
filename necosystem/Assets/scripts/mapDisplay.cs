@@ -8,7 +8,7 @@ public class mapDisplay : MonoBehaviour
     public MeshFilter meshFilter;
     public MeshRenderer meshRenderer;
 
-    public void drawTexture(Texture2D texture)
+    public void DrawTexture(Texture2D texture)
     {
         textureRender.sharedMaterial.mainTexture = texture; //apply texture to plane in scene view
         textureRender.transform.localScale = new Vector3(texture.width, 1, texture.height); //make plane size scale to texture size
@@ -16,7 +16,7 @@ public class mapDisplay : MonoBehaviour
 
     public void DrawMesh(MeshData meshData, Texture2D texture)
     {
-        meshFilter.sharedMesh = meshData.createMesh();
+        meshFilter.sharedMesh = meshData.CreateMesh();
         meshRenderer.sharedMaterial.mainTexture = texture;
     }
 }

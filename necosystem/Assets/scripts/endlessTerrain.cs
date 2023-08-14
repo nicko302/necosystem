@@ -86,9 +86,11 @@ public class endlessTerrain : MonoBehaviour
 
         MeshRenderer meshRenderer;
         MeshFilter meshFilter;
+        MeshCollider meshCollider;
 
         LODInfo[] detailLevels;
         LODMesh[] lodMeshes;
+        LODMesh collisionLODMesh;
 
         MapData mapData;
         bool mapDataReceived;
@@ -105,6 +107,7 @@ public class endlessTerrain : MonoBehaviour
             meshObject = new GameObject("Terrain Chunk");
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
             meshFilter = meshObject.AddComponent<MeshFilter>();
+            meshCollider = meshObject.AddComponent<MeshCollider> ();
             meshRenderer.material = material;
 
             meshObject.transform.position = positionV3 * scale;
@@ -116,6 +119,10 @@ public class endlessTerrain : MonoBehaviour
             for (int i = 0; i < detailLevels.Length; i++)
             {
                 lodMeshes[i] = new LODMesh(detailLevels[i].lod, updateTerrainChunk);
+                if (detailLevels[i].useForCollider)
+                {
+                    collisionLODMesh = lodMeshes[i];
+                }
             }
 
             mapGenerator.RequestMapData(position, OnMapDataReceived);
@@ -169,6 +176,14 @@ public class endlessTerrain : MonoBehaviour
                         }
                     }
 
+                    if (lodIndex == 0)
+                    {
+                        if (collisionLODMesh.hasMesh)
+                            meshCollider.sharedMesh = collisionLODMesh.mesh;
+                        else if (!collisionLODMesh.hasRequestedMesh)
+                            collisionLODMesh.RequestMesh(mapData);
+                    }
+
                     terrainChunksVisibleLastUpdate.Add(this); //adds the currently visible chunk to the list
                 }
 
@@ -203,7 +218,7 @@ public class endlessTerrain : MonoBehaviour
 
         void OnMeshDataReceived(MeshData meshData)
         {
-            mesh = meshData.createMesh();
+            mesh = meshData.CreateMesh();
             hasMesh = true;
 
             updateCallback();
@@ -221,5 +236,6 @@ public class endlessTerrain : MonoBehaviour
     {
         public int lod;
         public float visibleDstThreshold;
+        public bool useForCollider;
     }
 }
