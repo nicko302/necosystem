@@ -15,7 +15,7 @@ public static class falloffGenerator
                 float y = j / (float)size * 2 - 1;
 
                 float value = Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)); //calculates which is closest to 1
-                map[i,j] = Evaluate(value);
+                map[i, j] = Evaluate(value);
             }
         }
         return map;
