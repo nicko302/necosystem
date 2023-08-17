@@ -24,8 +24,7 @@ public class mapGenerator : MonoBehaviour
 
     void Start()
     {
-        textureData.ApplyToMaterial(terrainMaterial);
-        textureData.UpdateMeshHeights(terrainMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
+        
     }
 
     void OnValuesUpdated()

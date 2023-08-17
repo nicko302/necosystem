@@ -6,75 +6,52 @@ using UnityEngine;
 
 public class threadedDataRequester : MonoBehaviour
 {
-    Queue<MapThreadInfo<HeightMap>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<HeightMap>>();
-    Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
+    static threadedDataRequester instance;
+    Queue<ThreadInfo> dataQueue = new Queue<ThreadInfo>();
 
-    public void RequestHeightMap(Vector2 centre, Action<HeightMap> callback)
+    private void Awake()
+    {
+        instance = FindObjectOfType<threadedDataRequester>();
+    }
+
+    public static void RequestData(Func<object> generateData, Action<object> callback)
     {
         ThreadStart threadStart = delegate
         {
-            HeightMapThread(centre, callback);
+            instance.DataThread(generateData, callback);
         };
 
         new Thread(threadStart).Start();
     }
 
-    void HeightMapThread(Vector2 centre, Action<HeightMap> callback)
+    void DataThread(Func<object> generateData, Action<object> callback)
     {
-        HeightMap heightMap = heightMapGenerator.generateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, centre);
-        lock (mapDataThreadInfoQueue) //thread can only be executed one at a time
+        object data = generateData();
+        lock (dataQueue) //thread can only be executed one at a time
         {
-            mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<HeightMap>(callback, heightMap)); //add new threading task to queue
+            dataQueue.Enqueue(new ThreadInfo(callback, data)); //add new threading task to queue
         }
 
     }
 
-    public void RequestMeshData(HeightMap heightMap, int lod, Action<MeshData> callback)
+    void Update()
     {
-        ThreadStart threadStart = delegate
+        if (dataQueue.Count > 0)
         {
-            MeshDataThread(heightMap, lod, callback);
-        };
-
-        new Thread(threadStart).Start();
-    }
-
-    void MeshDataThread(HeightMap heightMap, int lod, Action<MeshData> callback)
-    {
-        MeshData meshData = meshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, lod);
-        lock (meshDataThreadInfoQueue) //thread can only be executed one at a time
-        {
-            meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData)); //add new threading task to queue
-        }
-    }
-
-    private void Update()
-    {
-        if (mapDataThreadInfoQueue.Count > 0)
-        {
-            for (int i = 0; i < mapDataThreadInfoQueue.Count; i++)
+            for (int i = 0; i < dataQueue.Count; i++)
             {
-                MapThreadInfo<HeightMap> threadInfo = mapDataThreadInfoQueue.Dequeue(); //next thing in queue
-                threadInfo.callback(threadInfo.parameter);
-            }
-        }
-
-        if (meshDataThreadInfoQueue.Count > 0)
-        {
-            for (int i = 0; i < meshDataThreadInfoQueue.Count; i++)
-            {
-                MapThreadInfo<MeshData> threadInfo = meshDataThreadInfoQueue.Dequeue();
+                ThreadInfo threadInfo = dataQueue.Dequeue(); //next thing in queue
                 threadInfo.callback(threadInfo.parameter);
             }
         }
     }
 
-    struct MapThreadInfo<T>
+    struct ThreadInfo
     {
-        public readonly Action<T> callback;
-        public readonly T parameter;
+        public readonly Action<object> callback;
+        public readonly object parameter;
 
-        public MapThreadInfo(Action<T> callback, T parameter)
+        public ThreadInfo(Action<object> callback, object parameter)
         {
             this.callback = callback;
             this.parameter = parameter;
