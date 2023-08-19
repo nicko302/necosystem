@@ -32,8 +32,8 @@ public class textureData : UpdatableData
 
     public void UpdateMeshHeights(Material material, float minHeight, float maxHeight)
     {
-        savedMaxHeight = maxHeight;
         savedMinHeight = minHeight;
+        savedMaxHeight = maxHeight;
 
         material.SetFloat("minHeight", minHeight);
         material.SetFloat("maxHeight", maxHeight);
@@ -55,7 +55,7 @@ public class textureData : UpdatableData
     {
         public Texture2D texture;
         public Color tint;
-        [Range(0,1)]
+        [Range(0, 1)]
         public float tintStrength;
         [Range(0, 1)]
         public float startHeight;
