@@ -38,7 +38,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _Addittionalfoam:
         m_Texture: {fileID: 2800000, guid: 3e9621926cb7ef440a683d33de90a485, type: 3}
-        m_Scale: {x: 12, y: 12}
+        m_Scale: {x: 150, y: 150}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
@@ -66,7 +66,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _FoamTexture:
         m_Texture: {fileID: 2800000, guid: 352eedab30797fa41b34ec4e4abecb97, type: 3}
-        m_Scale: {x: 24, y: 24}
+        m_Scale: {x: 180, y: 180}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
@@ -74,7 +74,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _MainTexture:
         m_Texture: {fileID: 2800000, guid: 38ab8aca4d89a4c4f93b72ac8d1e3f8e, type: 3}
-        m_Scale: {x: 10, y: 10}
+        m_Scale: {x: 20, y: 20}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
@@ -121,7 +121,7 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _NoiseLerpModifier: 0.0501
-    - _Noiselevel: 0.0732
+    - _Noiselevel: 0.12
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ShinePower: 4

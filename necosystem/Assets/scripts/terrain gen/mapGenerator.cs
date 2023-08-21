@@ -36,6 +36,12 @@ public class mapGenerator : MonoBehaviour
         textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
     }
 
+    private void Start()
+    {
+        textureData.ApplyToMaterial(terrainMaterial);
+        textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
+    }
+
     void OnValuesUpdated()
     {
         if (!Application.isPlaying)
@@ -192,7 +198,7 @@ public class mapGenerator : MonoBehaviour
     }
 }
 
-public struct MapData //stores the heightmap and colourmap values to be passed between methods
+public struct MapData //stores the heightmap values to be passed between methods
 {
     public readonly float[,] heightMap;
 

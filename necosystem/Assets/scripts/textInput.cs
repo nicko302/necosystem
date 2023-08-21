@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
 
@@ -16,6 +17,20 @@ public class textInput : MonoBehaviour
     public endlessTerrain endlessTerrain;
     public mapGenerator mapGenerator;
     public int x = -1;
+    public int z = 1;
+    public string seed;
+
+    private void Start()
+    {
+        islandMesh.SetActive(true);
+
+        System.Random randSeed = new System.Random();
+        z = randSeed.Next(1, 1000000000);
+        noiseData.seed = z;
+        mapGenerator.DrawMapInEditor();
+        Debug.Log(noiseData.seed);
+    }
+
 
     public void ReadInputSeed(string s)
     {
@@ -28,6 +43,7 @@ public class textInput : MonoBehaviour
             Debug.Log("seed: " + noiseData.seed);
 
             mapGenerator.DrawMapInEditor();
+            seed = s;
         }
         else
         {
@@ -57,11 +73,7 @@ public class textInput : MonoBehaviour
 
     public void OnClick()
     {
-        //textureData.ApplyToMaterial(terrainMaterial);
-    }
-
-    private void Start()
-    {
-        islandMesh.SetActive(true);
+        PlayerPrefs.SetString("seed", seed);
+        SceneManager.LoadScene(2);
     }
 }
