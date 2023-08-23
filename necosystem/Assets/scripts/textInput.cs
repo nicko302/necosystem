@@ -31,6 +31,12 @@ public class textInput : MonoBehaviour
         Debug.Log(noiseData.seed);
     }
 
+    private void Awake()
+    {
+        terrainData.meshHeightMultiplier = 9;
+        terrainData.uniformScale = 3;
+    }
+
 
     public void ReadInputSeed(string s)
     {
@@ -59,7 +65,10 @@ public class textInput : MonoBehaviour
 
         if (Int32.TryParse(s, out x))
         {
+            //default meshHeight = 20, default uniformScale = 3
+            float meshHeight = terrainData.meshHeightMultiplier * (terrainData.uniformScale / x);
             terrainData.uniformScale = x;
+            terrainData.meshHeightMultiplier = meshHeight;
             Debug.Log("size: " + terrainData.uniformScale);
 
             mapGenerator.DrawMapInEditor();

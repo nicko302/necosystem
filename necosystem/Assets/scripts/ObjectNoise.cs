@@ -33,15 +33,15 @@ public class ObjectNoise : MonoBehaviour
         for (int y = 0; y < mapChunkSize; y++)
             for (int x = 0; x < mapChunkSize; x++) //for each x and y position
             {
-                float[,] noiseMap = GenerateNoiseMap();
+                //float[,] noiseMap = GenerateNoiseMap();
                 //float v = Random.Range(0f, treeDensity);
                 if (Random.Range(1,5) == 1) //if (noiseMap[x, y] < v)
                 {
                     GameObject prefab = treePrefabs[Random.Range(0, treePrefabs.Length)];
                     GameObject tree = Instantiate(prefab, transform);
-                    tree.transform.position = new Vector3(x, 0, y);
-                    tree.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
-                    tree.transform.localScale = Vector3.one * Random.Range(.8f, 1.2f);
+                    //tree.transform.position = new Vector3(x, 0, y);
+                    //tree.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
+                    //tree.transform.localScale = Vector3.one * Random.Range(.8f, 1.2f);
                 }
             }
     }
