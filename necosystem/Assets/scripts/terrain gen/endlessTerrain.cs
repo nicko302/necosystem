@@ -24,7 +24,7 @@ public class endlessTerrain : MonoBehaviour
     int chunksVisibleInViewDst;
 
     Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
-    static List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
+    public static List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
 
     
     void Start()
@@ -108,9 +108,20 @@ public class endlessTerrain : MonoBehaviour
         int colliderLODIndex;
 
         MapData mapData;
+        public terrainData terrainData;
+        ObjectNoise objectNoise;
         bool mapDataReceived;
         int previousLODIndex = -1;
         bool hasSetCollider;
+        public static int chunkSizeIndex = 8;
+        public int mapChunkSize
+        {
+            get
+            {
+                return meshGenerator.supportedChunkSizes[chunkSizeIndex] - 1;
+            }
+        }
+
 
         public TerrainChunk(Vector2 coord, int size, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material)
         {

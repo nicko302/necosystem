@@ -11,30 +11,23 @@ public class ObjectRayCast : MonoBehaviour
     {
         FindLand();
     }
-
+ 
     public void FindLand()
     {
-        Ray ray = new Ray(transform.position, -transform.up);
-        RaycastHit hitInfo;
-
-        if (transform.position.y > 20)
+        RaycastHit hit;
+        Debug.DrawRay(transform.position, -transform.up, Color.green);
+        if (Physics.Raycast(transform.position, -transform.up, out hit))
         {
-            if (Physics.Raycast(ray, out hitInfo)) //if theres ground beneath, set object position on ground
+            if (hit.point.y > 5)
             {
-                transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z);
+                transform.position = new Vector3(hit.point.x, hit.point.y - 0.4f, hit.point.z);
+                Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
             }
             else
             {
-                ray = new Ray(transform.position, transform.up);
-                if (Physics.Raycast(ray, out hitInfo))
-                {
-                    transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y, hitInfo.point.z); //if no ground beneath, but there is ground above - set position there
-                }
+                Destroy(gameObject);
             }
         }
-        else
-        {
-            obj.SetActive(false);
-        }
     }
+    
 }
