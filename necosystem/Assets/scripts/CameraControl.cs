@@ -19,19 +19,14 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            lastMouse = Input.mousePosition - lastMouse;
-            lastMouse = new Vector3(-lastMouse.y * camSens, lastMouse.x * camSens, 0);
-            lastMouse = new Vector3(transform.eulerAngles.x + lastMouse.x, transform.eulerAngles.y + lastMouse.y, 0);
-            transform.eulerAngles = lastMouse;
-            lastMouse = Input.mousePosition;
-            //mouse camera angle  
-        }
-
+        lastMouse = Input.mousePosition - lastMouse;
+        lastMouse = new Vector3(-lastMouse.y * camSens, lastMouse.x * camSens, 0);
+        lastMouse = new Vector3(transform.eulerAngles.x + lastMouse.x, transform.eulerAngles.y + lastMouse.y, 0);
+        transform.eulerAngles = lastMouse;
+        lastMouse = Input.mousePosition;
 
         //keyboard commands
-        float f = 0.0f;
+        //float f = 0.0f;
         Vector3 p = GetBaseInput();
         if (p.sqrMagnitude > 0)
         { // only move while a direction key is pressed
