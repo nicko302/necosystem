@@ -17,7 +17,17 @@ public class CameraControl : MonoBehaviour
     private Vector3 lastMouse = new Vector3(255, 255, 255); //positions mouse in middle of  screen
     private float totalRun = 1.0f;
 
+    public CameraMotion cameraMotion;
+
     void Update()
+    {
+        if (cameraMotion.enableFreecam)
+        {
+            Move();
+        }
+    }
+
+    private void Move()
     {
         lastMouse = Input.mousePosition - lastMouse;
         lastMouse = new Vector3(-lastMouse.y * camSens, lastMouse.x * camSens, 0);
