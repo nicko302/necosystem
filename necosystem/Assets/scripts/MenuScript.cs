@@ -162,7 +162,7 @@ public class MenuScript : MonoBehaviour
     #region generator inputs
     public void ReadInputSeed(string s) //when seed is changed
     {
-        if (Int32.TryParse(s, out x))
+        if (Int32.TryParse(s, out x)) //set seed string to int
         {
             noiseData.seed = x;
             Debug.Log("seed: " + noiseData.seed);
@@ -170,9 +170,12 @@ public class MenuScript : MonoBehaviour
             mapGenerator.DrawMapInEditor();
             seed = s;
         }
-        else
+        else //if cannot set to int (i.e. if string is alphabetical characters) ---- error handling
         {
             Debug.Log("bad");
+
+            TMP_InputField seedInputField = seedInput.GetComponent<TMP_InputField>();
+            seedInputField.text = "Enter number!";
         }
     }
 
