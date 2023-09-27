@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,7 +30,7 @@ public class AnimalAttributes : MonoBehaviour
         health = 100;
         thirst = 100;
         libido = 100;
-        strength = 5;
-        speed = 5;
+        strength = UnityEngine.Random.Range(1,10);
+        speed = UnityEngine.Random.Range(1,10);
     }
 }
