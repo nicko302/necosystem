@@ -24,6 +24,18 @@ public class AnimalAttributes : MonoBehaviour
     [Range(0, 10)]
     public int strength;
 
+    
+    public AnimalAttributes()
+    {
+        health = 100;
+        thirst = 100;
+        libido = 100;
+        strength = 5;
+        speed = 5;
+    }
+
+
+
     [ContextMenu("Set Default Values")]
     public void SetDefaults()
     {
@@ -32,5 +44,26 @@ public class AnimalAttributes : MonoBehaviour
         libido = 100;
         strength = UnityEngine.Random.Range(1,10);
         speed = UnityEngine.Random.Range(1,10);
+    }
+
+    [ContextMenu("Find nearest food")]
+    public virtual void LocateFood()
+    {
+        if (this.gameObject.GetComponent<AnimalAttributes>().health <= 40)
+        {
+            Debug.Log("Finding food");
+
+        }
+    }
+
+    [ContextMenu("Eat nearest food")]
+    public virtual void EatFood()
+    {
+        this.gameObject.GetComponent<AnimalAttributes>().health += 20;
+
+        if (this.gameObject.GetComponent<AnimalAttributes>().health > 100) //keep within 0-100
+        {
+            this.gameObject.GetComponent<AnimalAttributes>().health -= (this.gameObject.GetComponent<AnimalAttributes>().health - 100);
+        }
     }
 }

@@ -42,7 +42,7 @@ public class ObjectNoise : MonoBehaviour
                 if (Random.Range(1, treeDensity) == 1)
                 {
                     GameObject treePrefab = treePrefabs[Random.Range(0, treePrefabs.Length)];
-                    GameObject tree = Instantiate(treePrefab);
+                    GameObject tree = Instantiate(treePrefab, this.transform);
                     tree.transform.position = new Vector3(x, 60, y);
                     tree.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                     tree.transform.localScale = Vector3.one * Random.Range(minTreeScale, maxTreeScale);
@@ -57,7 +57,7 @@ public class ObjectNoise : MonoBehaviour
                 if (Random.Range(1, grassDensity) == 1)
                 {
                     GameObject grassPrefab = grassPrefabs[Random.Range(0, grassPrefabs.Length)];
-                    GameObject grass = Instantiate(grassPrefab);
+                    GameObject grass = Instantiate(grassPrefab, this.transform);
                     grass.transform.position = new Vector3(x, 60, y);
                     grass.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                     grass.transform.localScale = Vector3.one * Random.Range(minGrassScale, maxGrassScale);
@@ -72,7 +72,7 @@ public class ObjectNoise : MonoBehaviour
                 if (Random.Range(1,objectDensity) == 1)
                 {
                     GameObject objPrefab = objectPrefabs[Random.Range(0, objectPrefabs.Length)];
-                    GameObject obj = Instantiate(objPrefab);
+                    GameObject obj = Instantiate(objPrefab, this.transform);
                     obj.transform.position = new Vector3(x, 60, y);
                     obj.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                     obj.transform.localScale = Vector3.one * Random.Range(minObjectScale, maxObjectScale);

@@ -32,7 +32,7 @@ public class AnimalSpawn : MonoBehaviour
                 if (Random.Range(1, foxSpawnDensity) == 1)
                 {
                     GameObject foxPrefab = foxPrefabs[Random.Range(0, foxPrefabs.Length)];
-                    GameObject fox = Instantiate(foxPrefab);
+                    GameObject fox = Instantiate(foxPrefab, this.transform);
                     fox.transform.position = new Vector3(x, 60, y);
                     fox.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                 }
@@ -46,7 +46,7 @@ public class AnimalSpawn : MonoBehaviour
                 if (Random.Range(1, rabbitSpawnDensity) == 1)
                 {
                     GameObject rabbitPrefab = rabbitPrefabs[Random.Range(0, rabbitPrefabs.Length)];
-                    GameObject rabbit = Instantiate(rabbitPrefab);
+                    GameObject rabbit = Instantiate(rabbitPrefab, this.transform);
                     rabbit.transform.position = new Vector3(x, 60, y);
                     rabbit.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                 }
