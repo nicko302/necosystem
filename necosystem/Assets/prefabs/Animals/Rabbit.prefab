@@ -128,5 +128,8 @@ MonoBehaviour:
   health: 100
   thirst: 100
   libido: 100
-  speed: 5
+  intSpeed: 50
   strength: 5
+  isPathfinding: 0
+  objectNoise: {fileID: 1349576994165471185, guid: f724ac22a84b1114d8797da62e7a0afe, type: 3}
+  target: {fileID: 7806990491278317110, guid: 77eb8070c19c58447beef5e91421c36a, type: 3}

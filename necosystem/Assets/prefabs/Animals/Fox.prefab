@@ -129,5 +129,6 @@ MonoBehaviour:
   health: 100
   thirst: 100
   libido: 100
-  speed: 5
+  intSpeed: 50
   strength: 5
+  target: {fileID: 7419763933912794453, guid: 06566900368b1074d911e09f6bdd344e, type: 3}

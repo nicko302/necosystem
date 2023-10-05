@@ -18,6 +18,7 @@ public class ObjectNoise : MonoBehaviour
     public int grassDensity;
     public float minGrassScale = .7f;
     public float maxGrassScale = 1.3f;
+    public List<Transform> grassTransforms = new List<Transform>();
 
     [Header("Objects")]
     public GameObject[] objectPrefabs;
@@ -58,6 +59,7 @@ public class ObjectNoise : MonoBehaviour
                 {
                     GameObject grassPrefab = grassPrefabs[Random.Range(0, grassPrefabs.Length)];
                     GameObject grass = Instantiate(grassPrefab, this.transform);
+                    grassTransforms.Add(grass.transform);
                     grass.transform.position = new Vector3(x, 60, y);
                     grass.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                     grass.transform.localScale = Vector3.one * Random.Range(minGrassScale, maxGrassScale);
