@@ -67,7 +67,7 @@ public class AnimalSpawn : MonoBehaviour
     IEnumerator WaitSeconds()
     {
         yield return new WaitForSeconds(1);
-        SpawnFox();
-        SpawnRabbit();
+        //SpawnFox();
+        //SpawnRabbit();
     }
 }

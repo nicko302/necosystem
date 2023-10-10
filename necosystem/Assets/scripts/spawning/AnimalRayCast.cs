@@ -22,7 +22,7 @@ public class AnimalRayCast : MonoBehaviour
         {
             if (hit.point.y > 4)
             {
-                transform.position = new Vector3(hit.point.x, hit.point.y - 0.4f, hit.point.z);
+                transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
                 Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
             }
             else

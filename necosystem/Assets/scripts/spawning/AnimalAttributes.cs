@@ -136,9 +136,7 @@ public class AnimalAttributes : MonoBehaviour
     IEnumerator waitBeforeEating()
     {
         yield return new WaitForSeconds(3);
-        Debug.Log("Eating food");
         this.gameObject.GetComponent<Rabbit>().EatFood();
-
     }
 
     public void OnDrawGizmos()
