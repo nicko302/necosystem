@@ -10,7 +10,7 @@ public class Grid : MonoBehaviour
     public Vector2 gridWorldSize;
     public float nodeRadius;
     public TerrainType[] walkableRegions;
-    public int obstacleProximityPenalty = 15;
+    public int obstacleProximityPenalty = 100;
     LayerMask walkableMask;
     Dictionary<int, int> walkableRegionsDictionary = new Dictionary<int, int>();
 

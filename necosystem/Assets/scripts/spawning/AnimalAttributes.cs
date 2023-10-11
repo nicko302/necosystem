@@ -20,9 +20,11 @@ public class AnimalAttributes : MonoBehaviour
     [Tooltip("How fast the animal can travel")]
     [Range(30, 70)]
     public int intSpeed;
+    public float turnDst = 5;
+    public float turnSpeed = 3;
     public float speed
     {
-        get { return (float)intSpeed / 10f; }
+        get { return (float)intSpeed / 5f; }
     }
     [Tooltip("How much damage the animal does to others")]
     [Range(1, 9)]
@@ -34,9 +36,14 @@ public class AnimalAttributes : MonoBehaviour
     public float distance;
     public float nearestDistance = 10000;
 
-    Vector3[] path;
-    int targetIndex;
+
+    Path path;
+
     public Transform target;
+    const float pathUpdateMoveThreshold = .5f;
+    const float minPathUpdateTime = .2f;
+    public bool beHungry = false;
+    public bool hungry = false;
 
     public AnimalAttributes() //default values
     {
@@ -84,56 +91,109 @@ public class AnimalAttributes : MonoBehaviour
     {
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
-
-        if (this.gameObject.GetComponent<AnimalAttributes>().health <= 60) 
+        if (hungry == false)
         {
-            if (nearestGrass != null) //if health meets threshold and the nearest grass has been located, pathfind
-            {
-                target = nearestGrass.transform;
-                this.gameObject.GetComponent<Rabbit>().LocateFood();
-            }
-            else
-            {
-                this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-            }
+            Debug.Log("not hungry");
+            CheckHunger();
         }
+
+        if (hungry && !beHungry)
+        {
+            StartPathfinding();
+            this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+            hungry = false;
+            beHungry = true;
+        }
+    }
+
+    private void CheckHunger()
+    {
+        if (this.gameObject.GetComponent<AnimalAttributes>().health <= 60)
+        {
+            hungry = true;
+        }
+    }
+
+    private void StartPathfinding()
+    {
+        StartCoroutine(UpdatePath());
+        this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+        target = nearestGrass.transform;
+        Debug.Log("Finding food");
+        this.gameObject.GetComponent<Rabbit>().LocateFood();
+    }
+
+    private void Start()
+    {
     }
     #endregion
 
     #region Pathfinding
 
-    public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
+    public void OnPathFound(Vector3[] waypoints, bool pathSuccessful)
     {
         Debug.Log("Path found");
         if (pathSuccessful)
         {
-            path = newPath;
+            path = new Path(waypoints, transform.position, turnDst); ;
             StopCoroutine("FollowPath");
             StartCoroutine("FollowPath");
         }
     }
 
-    IEnumerator FollowPath()
+    IEnumerator UpdatePath()
     {
-        Vector3 currentWaypoint = path[0];
+        if (Time.timeSinceLevelLoad < .3f)
+        {
+            yield return new WaitForSeconds(.3f);
+        }
+        PathRequestManager.RequestPath(this.transform.position, target.position, OnPathFound);
+
+        float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
+        Vector3 targetPosOld = target.position;
         while (true)
         {
-            if (transform.position == currentWaypoint)
+            yield return new WaitForSeconds(minPathUpdateTime);
+            if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
             {
-                targetIndex++;
-                if (targetIndex >= path.Length)
-                {
-                    yield break;
-                }
-                currentWaypoint = path[targetIndex];
+                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                targetPosOld = target.position;
+                this.gameObject.GetComponent<Rabbit>().GetClosestFood();
             }
-            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, (float)speed * Time.deltaTime); //move towards target
-            StartCoroutine(waitBeforeEating());
+
+        }
+
+    }
+
+    IEnumerator FollowPath()
+    {
+        bool followingPath = true;
+        int pathIndex = 0;
+        transform.LookAt(path.lookPoints[0]);
+        while (true)
+        {
+            Vector2 pos2D = new Vector2(transform.position.x, transform.position.z);
+            while (path.turnBoundaries[pathIndex].HasCrossedLine(pos2D))
+                if (pathIndex == path.finishLineIndex)
+                {
+                    followingPath = false;
+                    break;
+                }
+                else
+                    pathIndex++;
+
+            if (followingPath)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(path.lookPoints[pathIndex] - transform.position);
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
+                transform.Translate(Vector3.forward * Time.deltaTime * speed, Space.Self);
+            }
+            StartCoroutine(WaitBeforeEating());
             yield return null;
         }
     }
 
-    IEnumerator waitBeforeEating()
+    IEnumerator WaitBeforeEating()
     {
         yield return new WaitForSeconds(3);
         this.gameObject.GetComponent<Rabbit>().EatFood();
@@ -143,20 +203,7 @@ public class AnimalAttributes : MonoBehaviour
     {
         if (path != null)
         {
-            for (int i = targetIndex; i < path.Length; i++)
-            {
-                Gizmos.color = Color.black;
-                Gizmos.DrawCube(path[i], Vector3.one);
-
-                if (i == targetIndex)
-                {
-                    Gizmos.DrawLine(transform.position, path[i]);
-                }
-                else
-                {
-                    Gizmos.DrawLine(path[i-1], path[i]);
-                }
-            }
+            path.DrawWithGizmos();
         }
     }
     #endregion
