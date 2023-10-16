@@ -9,11 +9,13 @@ public class Rabbit : AnimalAttributes
     public void GetClosestFood()
     {
         nearestGrass = null;
+        allGrass = null;
 
         allGrass = GameObject.FindGameObjectsWithTag("Grass");
 
         distance = 0;
         nearestDistance = 10000;
+
         for (int i = 0; i < allGrass.Length; i++)
         {
             distance = Vector3.Distance(this.transform.position, allGrass[i].transform.position);
@@ -36,20 +38,25 @@ public class Rabbit : AnimalAttributes
     [ContextMenu("R - Eat food")]
     public override void EatFood()
     {
+        this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+
         if (nearestDistance < 2)
         {
-            beHungry = false;
-            //List<GameObject> allGrassList = allGrass.ToList();
+            isFindingFood = false;
+            hungry = false;
 
+            Debug.Log("destroying grass");
             Destroy(nearestGrass.transform.parent.gameObject);
-            //nearestGrass = null;
+            Debug.Log("grass destroyed");
 
             this.gameObject.GetComponent<AnimalAttributes>().health = 100;
+
+
             /*if (this.gameObject.GetComponent<Rabbit>().health > 100) //keep within 0-100
             {
                 this.gameObject.GetComponent<Rabbit>().health -= (this.gameObject.GetComponent<AnimalAttributes>().health - 100);
             }*/
-            this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+            //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
         }
     }

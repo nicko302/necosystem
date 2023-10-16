@@ -43,7 +43,7 @@ public class AnimalAttributes : MonoBehaviour
     public Transform target;
     const float pathUpdateMoveThreshold = .5f;
     const float minPathUpdateTime = .2f;
-    public bool beHungry = false;
+    public bool isFindingFood = false;
     public bool hungry = false;
 
     public AnimalAttributes() //default values
@@ -88,22 +88,21 @@ public class AnimalAttributes : MonoBehaviour
     #endregion
 
     #region Start/Update methods
-    private void Update()
+    private void FixedUpdate()
     {
-        this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+        //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
         if (hungry == false)
         {
-            Debug.Log("not hungry");
             CheckHunger();
         }
 
-        if (hungry && !beHungry)
+        if (hungry && !isFindingFood)
         {
+            //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
             StartPathfinding();
-            this.gameObject.GetComponent<Rabbit>().GetClosestFood();
             hungry = false;
-            beHungry = true;
+            isFindingFood = true;
         }
     }
 
@@ -111,6 +110,7 @@ public class AnimalAttributes : MonoBehaviour
     {
         if (this.gameObject.GetComponent<AnimalAttributes>().health <= 60)
         {
+            Debug.Log("hungry");
             hungry = true;
         }
     }

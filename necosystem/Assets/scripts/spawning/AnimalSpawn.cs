@@ -68,6 +68,6 @@ public class AnimalSpawn : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
         //SpawnFox();
-        //SpawnRabbit();
+        SpawnRabbit();
     }
 }
