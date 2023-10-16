@@ -22,6 +22,7 @@ public class AnimalAttributes : MonoBehaviour
     public int intSpeed;
     public float turnDst = 5;
     public float turnSpeed = 3;
+    public float stoppingDst = 10;
     public float speed
     {
         get { return (float)intSpeed / 5f; }
@@ -135,7 +136,7 @@ public class AnimalAttributes : MonoBehaviour
         Debug.Log("Path found");
         if (pathSuccessful)
         {
-            path = new Path(waypoints, transform.position, turnDst); ;
+            path = new Path(waypoints, transform.position, turnDst, stoppingDst); ;
             StopCoroutine("FollowPath");
             StartCoroutine("FollowPath");
         }
@@ -170,6 +171,9 @@ public class AnimalAttributes : MonoBehaviour
         bool followingPath = true;
         int pathIndex = 0;
         transform.LookAt(path.lookPoints[0]);
+
+        float speedPercent = 1;
+
         while (true)
         {
             Vector2 pos2D = new Vector2(transform.position.x, transform.position.z);
@@ -184,9 +188,18 @@ public class AnimalAttributes : MonoBehaviour
 
             if (followingPath)
             {
+                if (pathIndex >= path.slowDownIndex && stoppingDst > 0)
+                {
+                    speedPercent = Mathf.Clamp01(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(pos2D) / stoppingDst);
+                    if (speedPercent < 0.01f)
+                    {
+                        followingPath = false;
+                    }
+                }
+
                 Quaternion targetRotation = Quaternion.LookRotation(path.lookPoints[pathIndex] - transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
-                transform.Translate(Vector3.forward * Time.deltaTime * speed, Space.Self);
+                transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
             }
             StartCoroutine(WaitBeforeEating());
             yield return null;

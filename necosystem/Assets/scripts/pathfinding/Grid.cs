@@ -10,7 +10,7 @@ public class Grid : MonoBehaviour
     public Vector2 gridWorldSize;
     public float nodeRadius;
     public TerrainType[] walkableRegions;
-    public int obstacleProximityPenalty = 100;
+    public int obstacleProximityPenalty = 500;
     LayerMask walkableMask;
     Dictionary<int, int> walkableRegionsDictionary = new Dictionary<int, int>();
 
@@ -66,7 +66,7 @@ public class Grid : MonoBehaviour
                     walkableRegionsDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
                     if (hit.point.y > 5)
                     {
-                        movementPenalty = 3;
+                        movementPenalty += 3;
                     }
                 }
                 if (!walkable)
