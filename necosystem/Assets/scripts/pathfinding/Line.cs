@@ -27,7 +27,7 @@ public struct Line
         }
         else
         {
-            gradientPerpendicular = dy / dx;
+            gradientPerpendicular = dy / dx; //differentiation to calculate gradient of each direction line
         }
 
         if (gradientPerpendicular == 0)

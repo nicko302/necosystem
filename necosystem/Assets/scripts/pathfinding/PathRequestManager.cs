@@ -19,7 +19,7 @@ public class PathRequestManager : MonoBehaviour
         pathfinding = GetComponent<Pathfinding>();
     }
 
-    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback)
+    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback) //requests a path to be processed & enqueues it
     {
         Debug.Log("Path requested");
         PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
@@ -27,7 +27,7 @@ public class PathRequestManager : MonoBehaviour
         instance.TryProcessNext();
     }
 
-    void TryProcessNext()
+    void TryProcessNext() //attempts to start pathfinding with the first queued request
     {
         if (!isProcessingPath && pathRequestQueue.Count > 0)
         {

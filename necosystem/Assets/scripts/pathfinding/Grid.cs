@@ -169,16 +169,16 @@ public class Grid : MonoBehaviour
         return grid[x, y];
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmos() //draws grid in scene view for debugging/visualising
     {
         Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.y));
         if (grid != null && displayGridGizmos)
         {
             foreach (Node n in grid)
             {
-                Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty));
+                Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty)); //darkness of each node denotes its movement penalty value (white = ideal)
 
-                Gizmos.color = (n.walkable) ? Gizmos.color : Color.red;
+                Gizmos.color = (n.walkable) ? Gizmos.color : Color.red; //nodes become red if not walkable, i.e. for obstacles
                 Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter));
             }
         } 

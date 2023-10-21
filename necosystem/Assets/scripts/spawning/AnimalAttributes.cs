@@ -106,7 +106,7 @@ public class AnimalAttributes : MonoBehaviour
         }
     }
 
-    private void CheckHunger()
+    private void CheckHunger() //check if the health value meets the hungry threshold
     {
         if (this.gameObject.GetComponent<AnimalAttributes>().health <= 60)
         {
@@ -115,7 +115,7 @@ public class AnimalAttributes : MonoBehaviour
         }
     }
 
-    private void StartPathfinding()
+    private void StartPathfinding() //call the subroutines required to pathfind towards food
     {
         StartCoroutine(UpdatePath());
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
@@ -124,9 +124,6 @@ public class AnimalAttributes : MonoBehaviour
         this.gameObject.GetComponent<Rabbit>().LocateFood();
     }
 
-    private void Start()
-    {
-    }
     #endregion
 
     #region Pathfinding
@@ -142,7 +139,7 @@ public class AnimalAttributes : MonoBehaviour
         }
     }
 
-    IEnumerator UpdatePath()
+    IEnumerator UpdatePath() //updates the path to ensure it always points towards the foods location
     {
         if (Time.timeSinceLevelLoad < .3f)
         {

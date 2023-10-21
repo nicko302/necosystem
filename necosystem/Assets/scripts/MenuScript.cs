@@ -42,7 +42,7 @@ public class MenuScript : MonoBehaviour
     {
         islandMesh.SetActive(true);
 
-        System.Random randSeed = new System.Random();
+        System.Random randSeed = new System.Random(); //randomise seed to display in main menu
         z = randSeed.Next(1, 1000000000);
         noiseData.seed = z;
         mapGenerator.DrawMapInEditor();
@@ -72,7 +72,7 @@ public class MenuScript : MonoBehaviour
             islandMesh.SetActive(true);
         }
 
-        //generator transition
+        //menu screen to generator screen transition
         if (genFadeIn)
         {
             menuOptions.interactable = false;

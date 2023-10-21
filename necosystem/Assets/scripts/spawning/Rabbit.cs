@@ -6,7 +6,7 @@ using UnityEngine;
 public class Rabbit : AnimalAttributes
 {
     [ContextMenu("R - Locate nearest food")]
-    public void GetClosestFood()
+    public void GetClosestFood() //locates the nearest grass item (rabbit)
     {
         nearestGrass = null;
         allGrass = null;
@@ -36,7 +36,7 @@ public class Rabbit : AnimalAttributes
     }
 
     [ContextMenu("R - Eat food")]
-    public override void EatFood()
+    public override void EatFood() //destroys/eats grass object
     {
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 

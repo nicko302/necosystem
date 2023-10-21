@@ -18,9 +18,9 @@ public class AnimalRayCast : MonoBehaviour
     {
         RaycastHit hit;
         Debug.DrawRay(transform.position, -transform.up, Color.green);
-        if (Physics.Raycast(transform.position, -transform.up, out hit))
+        if (Physics.Raycast(transform.position, -transform.up, out hit)) //shoots ray down, outputs hit information in 'hit'
         {
-            if (hit.point.y > 4)
+            if (hit.point.y > 4) //checks height of terrain it hits
             {
                 transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
                 Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);

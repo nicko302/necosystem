@@ -76,8 +76,8 @@ public class mapGenerator : MonoBehaviour
 
         MapData mapData = GenerateMapData(Vector2.zero);
 
-        mapDisplay display = FindObjectOfType<mapDisplay>(); //sets display to object with mapDisplay script
-        if (drawMode == DrawMode.NoiseMap)
+        mapDisplay display = FindObjectOfType<mapDisplay>(); //sets 'display' to object with 'mapDisplay' script - i.e. the map generator
+        if (drawMode == DrawMode.NoiseMap) //check which draw mode is enabled
             display.DrawTexture(textureGenerator.TextureFromHeightMap(mapData.heightMap));
         else if (drawMode == DrawMode.Mesh)
             display.DrawMesh(meshGenerator.GenerateTerrainMesh(mapData.heightMap, terrainData.meshHeightMultiplier, terrainData.meshHeightCurve, editorPreviewLOD, terrainData.useFlatShading));

@@ -20,7 +20,7 @@ public class Pathfinding : MonoBehaviour
         StartCoroutine(FindPath(startPos, targetPos));
     }
 
-    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos)
+    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos) //locates each node of the path - i.e. A* algorithm
     {
         Vector3[] waypoints = new Vector3[0];
         bool pathSuccess = false;
@@ -49,11 +49,11 @@ public class Pathfinding : MonoBehaviour
                 {
                     if (!neighbour.walkable || closedSet.Contains(neighbour))
                     {
-                        continue;
+                        continue; //skip unnecessary nodes
                     }
 
                     int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour) + neighbour.movementPenalty;
-                    if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
+                    if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) //checks the node has lowest cost out of neighbours
                     {
                         neighbour.gCost = newMovementCostToNeighbour;
                         neighbour.hCost = GetDistance(neighbour, targetNode);
