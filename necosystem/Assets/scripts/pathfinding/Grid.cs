@@ -34,8 +34,14 @@ public class Grid : MonoBehaviour
             walkableRegionsDictionary.Add((int)Mathf.Log(region.terrainMask.value, 2), region.terrainPenalty);
         }
 
-        CreateGrid();
+        //WaitSeconds();
     }
+
+    /*IEnumerator WaitSeconds()
+    {
+        yield return new WaitForSeconds(1);
+        CreateGrid();
+    }*/
 
     public int MaxSize
     {
@@ -48,17 +54,17 @@ public class Grid : MonoBehaviour
     void CreateGrid()
     {
         grid = new Node[gridSizeX, gridSizeY];
-        Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x / 2 - Vector3.forward * gridWorldSize.y/2;
+        Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x / 2 - Vector3.forward * gridWorldSize.y / 2;
 
         for (int x = 0; x < gridSizeX; x++)
-            for (int y = 0; y < gridSizeX; y++)
+            for (int z = 0; z < gridSizeX; z++)
             {
-                Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (y * nodeDiameter + nodeRadius);
-                bool walkable = !(Physics.CheckSphere(worldPoint,nodeRadius,unwalkableMask));
+                Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (z * nodeDiameter + nodeRadius);
+                bool walkable = !(Physics.CheckSphere(worldPoint, nodeRadius, unwalkableMask));
 
                 int movementPenalty = 0;
 
-                 // raycast to calculate A* movement penalty for each node based on layer or height
+                // raycast to calculate A* movement penalty for each node based on layer or height
                 Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, 100, walkableMask))
@@ -69,12 +75,28 @@ public class Grid : MonoBehaviour
                         movementPenalty += 3;
                     }
                 }
+                if (Physics.Raycast(ray, out hit, 100))
+                {
+                    worldPoint = new Vector3(worldPoint.x, hit.point.y, worldPoint.z); //sets the Y position of the node to the Y hit point of the ray
+                }
+
+                /* if (hit.transform.gameObject.layer == 8) //if the gameobject is on the unwalkable layer, mark it as unwalkable
+                {
+                    Debug.Log("### hit an unwalkable object");
+                    walkable = false;
+                }
+                else
+                {
+                    Debug.Log("XX not hit");
+                    walkable = true;
+                } */
+
                 if (!walkable)
                 {
                     movementPenalty += obstacleProximityPenalty;
                 }
 
-                grid[x, y] = new Node(walkable, worldPoint, x, y, movementPenalty);
+                grid[x, z] = new Node(walkable, worldPoint, x, Mathf.RoundToInt(worldPoint.y), z, movementPenalty);
             }
 
         BlurPenaltyMap(3);
@@ -83,7 +105,7 @@ public class Grid : MonoBehaviour
     void BlurPenaltyMap(int blurSize) //optimised box blur algorithm to blur the penalties between adjacent terraintypes (i.e. making terrain penalty differences less harsh across terrain)
     {
         int kernelSize = blurSize * 2 + 1;
-        int kernelExtents = (kernelSize -1 )/ 2;
+        int kernelExtents = (kernelSize - 1) / 2;
 
         int[,] penaltiesHorizontalPass = new int[gridSizeX, gridSizeY];
         int[,] penaltiesVerticalPass = new int[gridSizeX, gridSizeY];
@@ -99,9 +121,9 @@ public class Grid : MonoBehaviour
             for (int x = 1; x < gridSizeX; x++)
             {
                 int removeIndex = Mathf.Clamp(x - kernelExtents - 1, 0, gridSizeX); //remove index left of current node
-                int addIndex = Mathf.Clamp(x + kernelExtents, 0, gridSizeX-1); //add index right of current node
+                int addIndex = Mathf.Clamp(x + kernelExtents, 0, gridSizeX - 1); //add index right of current node
 
-                penaltiesHorizontalPass[x, y] = penaltiesHorizontalPass[x-1,y] - grid[removeIndex, y].movementPenalty + grid[addIndex, y].movementPenalty;
+                penaltiesHorizontalPass[x, y] = penaltiesHorizontalPass[x - 1, y] - grid[removeIndex, y].movementPenalty + grid[addIndex, y].movementPenalty;
             }
         }
 
@@ -121,9 +143,9 @@ public class Grid : MonoBehaviour
                 int removeIndex = Mathf.Clamp(y - kernelExtents - 1, 0, gridSizeY); //remove index top of current node
                 int addIndex = Mathf.Clamp(y + kernelExtents, 0, gridSizeY - 1); //add index bottom of current node
 
-                penaltiesVerticalPass[x, y] = penaltiesVerticalPass[x, y-1] - penaltiesHorizontalPass[x, removeIndex] + penaltiesHorizontalPass[x, addIndex];
+                penaltiesVerticalPass[x, y] = penaltiesVerticalPass[x, y - 1] - penaltiesHorizontalPass[x, removeIndex] + penaltiesHorizontalPass[x, addIndex];
                 blurredPenalty = Mathf.RoundToInt((float)penaltiesVerticalPass[x, y] / (kernelSize * kernelSize));
-                grid[x,y].movementPenalty = blurredPenalty;
+                grid[x, y].movementPenalty = blurredPenalty;
 
                 if (blurredPenalty > penaltyMax)
                     penaltyMax = blurredPenalty;
@@ -138,7 +160,7 @@ public class Grid : MonoBehaviour
     {
         List<Node> neighbours = new List<Node>();
 
-        for (int x = -1; x <=1;  x++)
+        for (int x = -1; x <= 1; x++)
             for (int y = -1; y <= 1; y++)
             {
                 if (x == 0 && y == 0)
@@ -158,7 +180,7 @@ public class Grid : MonoBehaviour
 
     public Node NodeFromWorldPoint(Vector3 worldPosition)
     {
-        float percentX = (worldPosition.x + gridWorldSize.x/2) / gridWorldSize.x;
+        float percentX = (worldPosition.x + gridWorldSize.x / 2) / gridWorldSize.x;
         float percentY = (worldPosition.z + gridWorldSize.y / 2) / gridWorldSize.y;
         percentX = Mathf.Clamp01(percentX);
         percentY = Mathf.Clamp01(percentY);
@@ -181,7 +203,7 @@ public class Grid : MonoBehaviour
                 Gizmos.color = (n.walkable) ? Gizmos.color : Color.red; //nodes become red if not walkable, i.e. for obstacles
                 Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter));
             }
-        } 
+        }
     }
 
     [System.Serializable]

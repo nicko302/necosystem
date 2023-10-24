@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3634559030825194275}
   - component: {fileID: 5707668880590822807}
   - component: {fileID: 976497305696416441}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Rock3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -93,7 +93,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7806990491278317110}
   - component: {fileID: 1323310792356887555}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Pebble 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
