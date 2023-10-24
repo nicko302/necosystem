@@ -6,31 +6,33 @@ using System;
 
 public class Pathfinding : MonoBehaviour
 {
-    PathRequestManager requestManager;
-    Grid grid;
+    public Grid Grid;
 
     private void Awake()
     {
-        grid = GetComponent<Grid>();
-        requestManager = GetComponent<PathRequestManager>();
+        Grid = GetComponent<Grid>();
     }
 
-    public void StartFindPath(Vector3 startPos, Vector3 targetPos)
+    private void Start()
     {
-        StartCoroutine(FindPath(startPos, targetPos));
+        foreach (Node node in Grid.grid)
+        {
+            node.FindGround();
+        }
     }
 
-    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos) //locates each node of the path - i.e. A* algorithm
+
+    public void FindPath(PathRequest request, Action<PathResult> callback) //locates each node of the path - i.e. A* algorithm
     {
         Vector3[] waypoints = new Vector3[0];
         bool pathSuccess = false;
 
-        Node startNode = grid.NodeFromWorldPoint(startPos);
-        Node targetNode = grid.NodeFromWorldPoint(targetPos);
+        Node startNode = Grid.NodeFromWorldPoint(request.pathStart);
+        Node targetNode = Grid.NodeFromWorldPoint(request.pathEnd);
 
         if (targetNode.walkable)
         {
-            Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
+            Heap<Node> openSet = new Heap<Node>(Grid.MaxSize);
             HashSet<Node> closedSet = new HashSet<Node>();
             openSet.Add(startNode);
 
@@ -45,7 +47,7 @@ public class Pathfinding : MonoBehaviour
                     break;
                 }
 
-                foreach (Node neighbour in grid.GetNeighbours(currentNode))
+                foreach (Node neighbour in Grid.GetNeighbours(currentNode))
                 {
                     if (!neighbour.walkable || closedSet.Contains(neighbour))
                     {
@@ -67,12 +69,11 @@ public class Pathfinding : MonoBehaviour
                 }
             }
         }
-        yield return null;
         if (pathSuccess)
         {
             waypoints = RetracePath(startNode, targetNode);
         }
-        requestManager.FinishedProcessingPath(waypoints, pathSuccess);
+        callback(new PathResult(waypoints, pathSuccess, request.callback));
 
     }
 

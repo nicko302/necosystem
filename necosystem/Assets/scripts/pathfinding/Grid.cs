@@ -7,17 +7,17 @@ public class Grid : MonoBehaviour
 {
     public bool displayGridGizmos;
     public LayerMask unwalkableMask;
-    public Vector2 gridWorldSize;
+    public Vector3 gridWorldSize;
     public float nodeRadius;
     public TerrainType[] walkableRegions;
     public int obstacleProximityPenalty = 500;
     LayerMask walkableMask;
     Dictionary<int, int> walkableRegionsDictionary = new Dictionary<int, int>();
 
-    Node[,] grid;
+    public Node[,] grid;
 
     float nodeDiameter;
-    int gridSizeX, gridSizeY;
+    int gridSizeX, gridSizeY, gridSizeZ;
 
     int penaltyMin = int.MaxValue;
     int penaltyMax = int.MinValue;
@@ -27,6 +27,7 @@ public class Grid : MonoBehaviour
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
+        gridSizeZ = Mathf.RoundToInt(gridWorldSize.z / nodeDiameter);
 
         foreach (TerrainType region in walkableRegions)
         {
@@ -41,40 +42,52 @@ public class Grid : MonoBehaviour
     {
         get
         {
-            return gridSizeX * gridSizeY;
+            return gridSizeX * gridSizeZ;
         }
     }
 
     void CreateGrid()
     {
-        grid = new Node[gridSizeX, gridSizeY];
-        Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x / 2 - Vector3.forward * gridWorldSize.y/2;
+        grid = new Node[gridSizeX, gridSizeZ];
+        Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x / 2 - Vector3.forward * gridWorldSize.z/2;
 
         for (int x = 0; x < gridSizeX; x++)
-            for (int y = 0; y < gridSizeX; y++)
+            for (int z = 0; z < gridSizeX; z++)
             {
-                Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (y * nodeDiameter + nodeRadius);
+                Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (z * nodeDiameter + nodeRadius);
                 bool walkable = !(Physics.CheckSphere(worldPoint,nodeRadius,unwalkableMask));
 
                 int movementPenalty = 0;
 
-                 // raycast to calculate A* movement penalty for each node based on layer or height
+                 // raycast fired at the ground from a point in the sky
                 Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 100, walkableMask))
+                if (Physics.Raycast(ray, out RaycastHit hit, 100, walkableMask))
                 {
                     walkableRegionsDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
                     if (hit.point.y > 5)
                     {
-                        movementPenalty += 3;
+                        movementPenalty += 3; // adds a movement penalty to each node depending on layer or vertical position
                     }
+
+                    worldPoint = new Vector3(worldPoint.x, hit.point.y, worldPoint.z); //sets the Y position of the node to the Y hit point of the ray
                 }
+
+                if (Physics.Raycast(ray, out hit, 100))
+                {
+                    worldPoint = new Vector3(worldPoint.x, hit.point.y, worldPoint.z); //sets the Y position of the node to the Y hit point of the ray
+                }
+
+                if (hit.transform.gameObject.layer == 8) //if the gameobject is on the unwalkable layer, mark it as unwalkable
+                    walkable = false;
+                else
+                    walkable = true;
+
                 if (!walkable)
                 {
                     movementPenalty += obstacleProximityPenalty;
                 }
 
-                grid[x, y] = new Node(walkable, worldPoint, x, y, movementPenalty);
+                grid[x, z] = new Node(walkable, worldPoint, x, Mathf.RoundToInt(worldPoint.y), z, movementPenalty);
             }
 
         BlurPenaltyMap(3);
@@ -85,10 +98,10 @@ public class Grid : MonoBehaviour
         int kernelSize = blurSize * 2 + 1;
         int kernelExtents = (kernelSize -1 )/ 2;
 
-        int[,] penaltiesHorizontalPass = new int[gridSizeX, gridSizeY];
-        int[,] penaltiesVerticalPass = new int[gridSizeX, gridSizeY];
+        int[,] penaltiesHorizontalPass = new int[gridSizeX, gridSizeZ];
+        int[,] penaltiesVerticalPass = new int[gridSizeX, gridSizeZ];
 
-        for (int y = 0; y < gridSizeY; y++) //horizontal pass
+        for (int y = 0; y < gridSizeZ; y++) //horizontal pass
         {
             for (int x = -kernelExtents; x <= kernelExtents; x++)
             {
@@ -116,10 +129,10 @@ public class Grid : MonoBehaviour
             int blurredPenalty = Mathf.RoundToInt((float)penaltiesVerticalPass[x, 0] / (kernelSize * kernelSize));
             grid[x, 0].movementPenalty = blurredPenalty;
 
-            for (int y = 1; y < gridSizeY; y++)
+            for (int y = 1; y < gridSizeZ; y++)
             {
-                int removeIndex = Mathf.Clamp(y - kernelExtents - 1, 0, gridSizeY); //remove index top of current node
-                int addIndex = Mathf.Clamp(y + kernelExtents, 0, gridSizeY - 1); //add index bottom of current node
+                int removeIndex = Mathf.Clamp(y - kernelExtents - 1, 0, gridSizeZ); //remove index top of current node
+                int addIndex = Mathf.Clamp(y + kernelExtents, 0, gridSizeZ - 1); //add index bottom of current node
 
                 penaltiesVerticalPass[x, y] = penaltiesVerticalPass[x, y-1] - penaltiesHorizontalPass[x, removeIndex] + penaltiesHorizontalPass[x, addIndex];
                 blurredPenalty = Mathf.RoundToInt((float)penaltiesVerticalPass[x, y] / (kernelSize * kernelSize));
@@ -147,7 +160,7 @@ public class Grid : MonoBehaviour
                 int checkX = node.gridX + x;
                 int checkY = node.gridY + y;
 
-                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
+                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeZ)
                 {
                     neighbours.Add(grid[checkX, checkY]);
                 }
@@ -159,19 +172,19 @@ public class Grid : MonoBehaviour
     public Node NodeFromWorldPoint(Vector3 worldPosition)
     {
         float percentX = (worldPosition.x + gridWorldSize.x/2) / gridWorldSize.x;
-        float percentY = (worldPosition.z + gridWorldSize.y / 2) / gridWorldSize.y;
+        float percentY = (worldPosition.z + gridWorldSize.z / 2) / gridWorldSize.z;
         percentX = Mathf.Clamp01(percentX);
         percentY = Mathf.Clamp01(percentY);
 
         int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
-        int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
+        int y = Mathf.RoundToInt((gridSizeZ - 1) * percentY);
 
         return grid[x, y];
     }
 
     private void OnDrawGizmos() //draws grid in scene view for debugging/visualising
     {
-        Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.y));
+        Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.z));
         if (grid != null && displayGridGizmos)
         {
             foreach (Node n in grid)

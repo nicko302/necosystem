@@ -6,21 +6,22 @@ public class Node : IHeapItem<Node>
 {
     public bool walkable;
     public Vector3 worldPosition;
-    public int gridX;
-    public int gridY;
+    public int gridX, gridY, gridZ;
     public int movementPenalty;
+    public float steepness;
 
     public int gCost;
     public int hCost;
     public Node parent;
     int heapIndex;
 
-    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY, int _penality)
+    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY, int _gridZ, int _penality)
     {
         walkable = _walkable;
         worldPosition = _worldPos;
         gridX = _gridX;
         gridY = _gridY;
+        gridZ = _gridZ;
         movementPenalty = _penality;
     }
 
@@ -52,5 +53,16 @@ public class Node : IHeapItem<Node>
             compare = hCost.CompareTo(nodeToCompare.hCost); //if f costs are equal, compare h costs instead (A*)
         }
         return -compare;
+    }
+
+    public void FindGround()
+    {
+        Vector3 gridPos = new Vector3(gridX, gridY, gridZ);
+        // raycast fired at the ground from each node
+        RaycastHit hit;
+        if (Physics.Raycast(gridPos, Vector3.down, out hit))
+        {
+            gridY = (int)hit.point.y;
+        }
     }
 }
