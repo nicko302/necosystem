@@ -32,7 +32,8 @@ public class Rabbit : AnimalAttributes
     [ContextMenu("R - Pathfind food")]
     public override void LocateFood()
     {
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+        StartCoroutine(UpdatePath());
+
     }
 
     [ContextMenu("R - Eat food")]
@@ -46,7 +47,8 @@ public class Rabbit : AnimalAttributes
             hungry = false;
 
             Debug.Log("destroying grass");
-            Destroy(nearestGrass.transform.parent.gameObject);
+            nearestGrassTransform = nearestGrass.transform;
+            nearestGrassTransform.position = new Vector3(nearestGrassTransform.position.x, -750, nearestGrassTransform.position.z);
             Debug.Log("grass destroyed");
 
             this.gameObject.GetComponent<AnimalAttributes>().health = 100;

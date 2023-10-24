@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1323310792356887555}
   - component: {fileID: 6321223798412507586}
   - component: {fileID: 2126167370403163837}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tree 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 3441213001550583640}
   - component: {fileID: 6089535464652985176}
   - component: {fileID: 7713673079150946533}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tree2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

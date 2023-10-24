@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7806990491278317110}
   - component: {fileID: 1323310792356887555}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Pebble 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57,7 +57,7 @@ GameObject:
   - component: {fileID: 6264116468293350409}
   - component: {fileID: 6132187800296813544}
   - component: {fileID: 3316230099055970433}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Rock2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

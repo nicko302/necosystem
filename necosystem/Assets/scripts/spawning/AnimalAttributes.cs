@@ -34,6 +34,7 @@ public class AnimalAttributes : MonoBehaviour
 
     public GameObject[] allGrass;
     public GameObject nearestGrass;
+    public Transform nearestGrassTransform;
     public float distance;
     public float nearestDistance = 10000;
 
@@ -72,7 +73,7 @@ public class AnimalAttributes : MonoBehaviour
     public virtual void LocateFood() //default find food method to be overwritten
     {
         Debug.Log("Finding food");
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+        StartCoroutine(UpdatePath());
     }
 
     [ContextMenu("Eat nearest food")]
@@ -96,13 +97,17 @@ public class AnimalAttributes : MonoBehaviour
         {
             CheckHunger();
         }
-
-        if (hungry && !isFindingFood)
+        else if (hungry && !isFindingFood)
         {
             //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
             StartPathfinding();
             hungry = false;
             isFindingFood = true;
+        }
+        if (target = null)
+        {
+            this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+            PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
         }
     }
 
@@ -139,13 +144,13 @@ public class AnimalAttributes : MonoBehaviour
         }
     }
 
-    IEnumerator UpdatePath() //updates the path to ensure it always points towards the foods location
+    public IEnumerator UpdatePath() //updates the path to ensure it always points towards the foods location
     {
         if (Time.timeSinceLevelLoad < .3f)
         {
             yield return new WaitForSeconds(.3f);
         }
-        PathRequestManager.RequestPath(this.transform.position, target.position, OnPathFound);
+        PathRequestManager.RequestPath(new PathRequest(this.transform.position, target.position, OnPathFound));
 
         float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
         Vector3 targetPosOld = target.position;
@@ -154,10 +159,12 @@ public class AnimalAttributes : MonoBehaviour
             yield return new WaitForSeconds(minPathUpdateTime);
             if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
             {
-                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
                 targetPosOld = target.position;
                 this.gameObject.GetComponent<Rabbit>().GetClosestFood();
             }
+            this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+            PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
 
         }
 
