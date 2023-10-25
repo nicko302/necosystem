@@ -8,6 +8,7 @@ public class Pathfinding : MonoBehaviour
 {
     PathRequestManager requestManager;
     Grid grid;
+    AnimalAttributes animalAttributes;
 
     private void Awake()
     {

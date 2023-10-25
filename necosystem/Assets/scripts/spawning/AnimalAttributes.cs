@@ -7,7 +7,7 @@ public class AnimalAttributes : MonoBehaviour
 {
     [Header("Needs")]
     [Tooltip("The hunger and health of the animal")]
-    [Range(0,100)]
+    [Range(0, 100)]
     public int health;
     [Tooltip("The desire for water")]
     [Range(0, 100)]
@@ -45,6 +45,10 @@ public class AnimalAttributes : MonoBehaviour
     const float minPathUpdateTime = .2f;
     public bool isFindingFood = false;
     public bool hungry = false;
+    public bool stop = false;
+    public GameObject randomMovementPrefab;
+
+    Grid grid;
 
     public AnimalAttributes() //default values
     {
@@ -61,8 +65,8 @@ public class AnimalAttributes : MonoBehaviour
         health = 100;
         thirst = 100;
         libido = 100;
-        strength = UnityEngine.Random.Range(1,10);
-        intSpeed = (UnityEngine.Random.Range(30,70) / 100);
+        strength = UnityEngine.Random.Range(1, 10);
+        intSpeed = UnityEngine.Random.Range(70, 100);
     }
 
 
@@ -95,6 +99,7 @@ public class AnimalAttributes : MonoBehaviour
         if (hungry == false)
         {
             CheckHunger();
+            //RandomMovement();
         }
 
         if (hungry && !isFindingFood)
@@ -113,6 +118,39 @@ public class AnimalAttributes : MonoBehaviour
             Debug.Log("hungry");
             hungry = true;
         }
+    }
+
+    private void RandomMovement()
+    {
+        StartCoroutine(WaitSecondsToStart());
+
+        
+
+        //StartCoroutine(WaitSecondsToStop());
+
+        //stop movement (using bool and if?)
+    }
+
+    IEnumerator WaitSecondsToStart()
+    {
+        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 15)); //wait a random amount of seconds
+
+        if (stop == false)
+        {
+            GameObject randomPosObj = Instantiate(randomMovementPrefab, this.transform);
+            randomPosObj.transform.position = new Vector3(UnityEngine.Random.Range(-240, 240), 50, UnityEngine.Random.Range(-240, 240)); //instantiate empty prefab in random x and z pos within range of island size
+            target = randomPosObj.transform; //target = the instantiated prefab
+            Debug.Log("random target found");
+            Destroy(randomPosObj);
+
+            this.gameObject.GetComponent<Rabbit>().RandomPathfind();
+            stop = true;
+        }
+    }
+    IEnumerator WaitSecondsToStop()
+    {
+        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 10)); //wait a random amount of seconds
+        stop = true;
     }
 
     private void StartPathfinding() //call the subroutines required to pathfind towards food

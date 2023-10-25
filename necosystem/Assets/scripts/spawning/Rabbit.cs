@@ -35,6 +35,11 @@ public class Rabbit : AnimalAttributes
         PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
     }
 
+    public  void RandomPathfind()
+    {
+        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+    }
+
     [ContextMenu("R - Eat food")]
     public override void EatFood() //destroys/eats grass object
     {

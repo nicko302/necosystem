@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
@@ -22,6 +23,7 @@ public class Grid : MonoBehaviour
     int penaltyMin = int.MaxValue;
     int penaltyMax = int.MinValue;
 
+    bool visible = true;
     private void Awake()
     {
         nodeDiameter = nodeRadius * 2;
@@ -33,15 +35,22 @@ public class Grid : MonoBehaviour
             walkableMask.value |= region.terrainMask.value;
             walkableRegionsDictionary.Add((int)Mathf.Log(region.terrainMask.value, 2), region.terrainPenalty);
         }
-
-        //WaitSeconds();
+        
     }
 
-    /*IEnumerator WaitSeconds()
+    private void Start()
     {
-        yield return new WaitForSeconds(1);
+        Debug.Log("Grid waiting to be created");
+
+        StartCoroutine(WaitSeconds());
+    }
+
+    IEnumerator WaitSeconds()
+    {
+        Debug.Log("Grid is creating");
+        yield return new WaitForSeconds(6);
         CreateGrid();
-    }*/
+    }
 
     public int MaxSize
     {
@@ -79,8 +88,9 @@ public class Grid : MonoBehaviour
                 {
                     worldPoint = new Vector3(worldPoint.x, hit.point.y, worldPoint.z); //sets the Y position of the node to the Y hit point of the ray
                 }
+                walkable = !(Physics.CheckSphere(worldPoint, nodeRadius, unwalkableMask));
 
-                /* if (hit.transform.gameObject.layer == 8) //if the gameobject is on the unwalkable layer, mark it as unwalkable
+                /*if (hit.transform.gameObject.layer == 8) //if the gameobject is on the unwalkable layer, mark it as unwalkable
                 {
                     Debug.Log("### hit an unwalkable object");
                     walkable = false;
@@ -89,14 +99,23 @@ public class Grid : MonoBehaviour
                 {
                     Debug.Log("XX not hit");
                     walkable = true;
-                } */
+                }*/
+
+                if (hit.point.y < 2)
+                {
+                    visible = false;
+                }
+                else
+                {
+                    visible = true;
+                }
 
                 if (!walkable)
                 {
                     movementPenalty += obstacleProximityPenalty;
                 }
 
-                grid[x, z] = new Node(walkable, worldPoint, x, Mathf.RoundToInt(worldPoint.y), z, movementPenalty);
+                grid[x, z] = new Node(walkable, worldPoint, x, Mathf.RoundToInt(worldPoint.y), z, movementPenalty, visible);
             }
 
         BlurPenaltyMap(3);
@@ -198,10 +217,13 @@ public class Grid : MonoBehaviour
         {
             foreach (Node n in grid)
             {
-                Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty)); //darkness of each node denotes its movement penalty value (white = ideal)
+                if (n.visible)
+                {
+                    Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty)); //darkness of each node denotes its movement penalty value (white = ideal)
 
-                Gizmos.color = (n.walkable) ? Gizmos.color : Color.red; //nodes become red if not walkable, i.e. for obstacles
-                Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter));
+                    Gizmos.color = (n.walkable) ? Gizmos.color : Color.red; //nodes become red if not walkable, i.e. for obstacles
+                    Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter));
+                }
             }
         }
     }
