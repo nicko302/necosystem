@@ -99,7 +99,10 @@ public class AnimalAttributes : MonoBehaviour
         if (hungry == false)
         {
             CheckHunger();
-            //RandomMovement();
+            if (stop == false)
+            {
+                RandomMovement();
+            }
         }
 
         if (hungry && !isFindingFood)
@@ -125,8 +128,11 @@ public class AnimalAttributes : MonoBehaviour
         StartCoroutine(WaitSecondsToStart());
 
         
-
-        //StartCoroutine(WaitSecondsToStop());
+        if (stop == false)
+        {
+            StartCoroutine(WaitSecondsToStop());
+            stop = true;
+        }
 
         //stop movement (using bool and if?)
     }
@@ -135,21 +141,17 @@ public class AnimalAttributes : MonoBehaviour
     {
         yield return new WaitForSeconds(UnityEngine.Random.Range(1, 15)); //wait a random amount of seconds
 
-        if (stop == false)
-        {
-            GameObject randomPosObj = Instantiate(randomMovementPrefab, this.transform);
-            randomPosObj.transform.position = new Vector3(UnityEngine.Random.Range(-240, 240), 50, UnityEngine.Random.Range(-240, 240)); //instantiate empty prefab in random x and z pos within range of island size
-            target = randomPosObj.transform; //target = the instantiated prefab
-            Debug.Log("random target found");
-            Destroy(randomPosObj);
+        GameObject randomPosObj = Instantiate(randomMovementPrefab, this.transform);
+        randomPosObj.transform.position = new Vector3(UnityEngine.Random.Range(-240, 240), 50, UnityEngine.Random.Range(-240, 240)); //instantiate empty prefab in random x and z pos within range of island size
+        target = randomPosObj.transform; //target = the instantiated prefab
+        Debug.Log("random target found");
+        Destroy(randomPosObj);
 
-            this.gameObject.GetComponent<Rabbit>().RandomPathfind();
-            stop = true;
-        }
+        this.gameObject.GetComponent<Rabbit>().RandomPathfind();
     }
     IEnumerator WaitSecondsToStop()
     {
-        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 10)); //wait a random amount of seconds
+        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 5)); //wait a random amount of seconds
         stop = true;
     }
 
