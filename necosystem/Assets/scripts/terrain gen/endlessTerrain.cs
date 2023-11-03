@@ -121,6 +121,13 @@ public class endlessTerrain : MonoBehaviour
                 return meshGenerator.supportedChunkSizes[chunkSizeIndex] - 1;
             }
         }
+        private LayerMask terrainChunkLayer
+        {
+            get
+            {
+                return LayerMask.NameToLayer("Terrain");
+            }
+        }
 
 
         public TerrainChunk(Vector2 coord, int size, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material)
@@ -134,6 +141,7 @@ public class endlessTerrain : MonoBehaviour
             Vector3 positionV3 = new Vector3(position.x,0,position.y);
 
             meshObject = new GameObject("Terrain Chunk");
+            meshObject.layer = terrainChunkLayer;
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
             meshFilter = meshObject.AddComponent<MeshFilter>();
             meshCollider = meshObject.AddComponent<MeshCollider> ();

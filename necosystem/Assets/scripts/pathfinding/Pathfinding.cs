@@ -18,6 +18,7 @@ public class Pathfinding : MonoBehaviour
 
     public void StartFindPath(Vector3 startPos, Vector3 targetPos)
     {
+        UnityEngine.Debug.Log("StartFindPath");
         StartCoroutine(FindPath(startPos, targetPos));
     }
 
@@ -71,6 +72,8 @@ public class Pathfinding : MonoBehaviour
         yield return null;
         if (pathSuccess)
         {
+            UnityEngine.Debug.Log("Path Success - FindPath");
+
             waypoints = RetracePath(startNode, targetNode);
         }
         requestManager.FinishedProcessingPath(waypoints, pathSuccess);
@@ -106,6 +109,8 @@ public class Pathfinding : MonoBehaviour
             }
             directionOld = directionNew;
         }
+        UnityEngine.Debug.Log("Waypoints found");
+
         return waypoints.ToArray();
     }
 

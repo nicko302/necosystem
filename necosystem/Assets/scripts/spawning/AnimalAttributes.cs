@@ -40,13 +40,37 @@ public class AnimalAttributes : MonoBehaviour
 
     Path path;
 
-    public Transform target;
+    public Vector3 target;
     const float pathUpdateMoveThreshold = .5f;
     const float minPathUpdateTime = .2f;
     public bool isFindingFood = false;
     public bool hungry = false;
     public bool stop = false;
     public GameObject randomMovementPrefab;
+    public int randNum = 0;
+
+
+    [Header("Random Movement Variables")]
+    [SerializeField]
+    [Tooltip("X / 10,000 chance to wander")]
+    public int chance = 1;
+    [SerializeField]
+    public float minInterval;
+    [SerializeField]
+    public float maxInterval;
+    public float timer;
+
+    [SerializeField]
+    public float boundSize = 240f;
+    [SerializeField]
+    public float height = 50f;
+    [SerializeField]
+    private bool moving = false;
+
+
+    private RandomMovement randomMovement;
+    private Rabbit rabbit;
+    private bool canWander = false;
 
     Grid grid;
 
@@ -76,7 +100,7 @@ public class AnimalAttributes : MonoBehaviour
     public virtual void LocateFood() //default find food method to be overwritten
     {
         Debug.Log("Finding food");
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
     [ContextMenu("Eat nearest food")]
@@ -92,24 +116,92 @@ public class AnimalAttributes : MonoBehaviour
     #endregion
 
     #region Start/Update methods
-    private void FixedUpdate()
+    private void Update()
     {
-        //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-
         if (hungry == false)
         {
             CheckHunger();
-            //RandomMovement();
+            randomMovement.isHungry = false; //allow animal to wander
         }
 
         if (hungry && !isFindingFood)
         {
-            //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+            randomMovement.isHungry = true; //stop animal from wandering
             StartPathfinding();
             hungry = false;
             isFindingFood = true;
         }
+
+        // checks every frame to see if the timer has reached zero
+        if (canWander)
+        {
+            if (timer <= 0)
+            {
+                if (!moving)
+                {
+                    // if animal is not moving AND the timer has reached zero, determine whether movement happens based off chance
+                    int randNum = UnityEngine.Random.Range(1, 10000);
+                    if (randNum <= chance)
+                    {
+                        RandomMovement();
+                    }
+                }
+                else //if animal is currently moving and timer reached zero
+                {
+                    StopRandomMovement();
+                }
+                timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
+            }
+            else
+            {
+                // otherwise, if the timer is greater than zero, reduce the timer by Time.deltaTime (the time in seconds since the last frame)
+                timer -= Time.deltaTime; // timer counts down
+            }
+        }
     }
+
+    private void Start()
+    {
+        randomMovement = this.GetComponent<RandomMovement>();
+        rabbit = this.GetComponent<Rabbit>();
+        StartCoroutine("DelayForWanderAI");
+
+        minInterval = 1;
+        maxInterval = 6;
+    }
+    #endregion
+
+    #region Pathfinding
+
+    IEnumerator DelayForWanderAI()
+    {
+        yield return new WaitForSeconds(4);
+        canWander = true;
+    }
+
+    [ContextMenu("Random Movement")]
+    void RandomMovement()
+    {
+        Debug.Log("starting wander");
+        target = new Vector3(UnityEngine.Random.Range(-boundSize, boundSize), height, UnityEngine.Random.Range(-boundSize, boundSize));
+        rabbit.LocateFood();
+
+        moving = true;
+    }
+
+    void StopRandomMovement()
+    {
+        Debug.Log("stopping wander");
+        StopCoroutine("FollowPath");
+
+        moving = false;
+    }
+
+    /*public virtual IEnumerator DelayForRandomMovement()
+    {
+        Debug.Log("Wrong random movement function");
+        yield return null;
+    }*/
 
     private void CheckHunger() //check if the health value meets the hungry threshold
     {
@@ -120,51 +212,14 @@ public class AnimalAttributes : MonoBehaviour
         }
     }
 
-    private void RandomMovement()
-    {
-        StartCoroutine(WaitSecondsToStart());
-
-        
-
-        //StartCoroutine(WaitSecondsToStop());
-
-        //stop movement (using bool and if?)
-    }
-
-    IEnumerator WaitSecondsToStart()
-    {
-        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 15)); //wait a random amount of seconds
-
-        if (stop == false)
-        {
-            GameObject randomPosObj = Instantiate(randomMovementPrefab, this.transform);
-            randomPosObj.transform.position = new Vector3(UnityEngine.Random.Range(-240, 240), 50, UnityEngine.Random.Range(-240, 240)); //instantiate empty prefab in random x and z pos within range of island size
-            target = randomPosObj.transform; //target = the instantiated prefab
-            Debug.Log("random target found");
-            Destroy(randomPosObj);
-
-            this.gameObject.GetComponent<Rabbit>().RandomPathfind();
-            stop = true;
-        }
-    }
-    IEnumerator WaitSecondsToStop()
-    {
-        yield return new WaitForSeconds(UnityEngine.Random.Range(1, 10)); //wait a random amount of seconds
-        stop = true;
-    }
-
     private void StartPathfinding() //call the subroutines required to pathfind towards food
     {
         StartCoroutine(UpdatePath());
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-        target = nearestGrass.transform;
+        target = nearestGrass.transform.position;
         Debug.Log("Finding food");
         this.gameObject.GetComponent<Rabbit>().LocateFood();
     }
-
-    #endregion
-
-    #region Pathfinding
 
     public void OnPathFound(Vector3[] waypoints, bool pathSuccessful)
     {
@@ -183,17 +238,17 @@ public class AnimalAttributes : MonoBehaviour
         {
             yield return new WaitForSeconds(.3f);
         }
-        PathRequestManager.RequestPath(this.transform.position, target.position, OnPathFound);
+        PathRequestManager.RequestPath(this.transform.position, target, OnPathFound);
 
         float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
-        Vector3 targetPosOld = target.position;
+        Vector3 targetPosOld = target;
         while (true)
         {
             yield return new WaitForSeconds(minPathUpdateTime);
-            if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
+            if ((target - targetPosOld).sqrMagnitude > sqrMoveThreshold)
             {
-                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
-                targetPosOld = target.position;
+                PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+                targetPosOld = target;
                 this.gameObject.GetComponent<Rabbit>().GetClosestFood();
             }
 

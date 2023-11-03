@@ -76,30 +76,23 @@ public class Grid : MonoBehaviour
                 // raycast to calculate A* movement penalty for each node based on layer or height
                 Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
                 RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 100, walkableMask))
-                {
-                    walkableRegionsDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
-                    if (hit.point.y > 5)
-                    {
-                        movementPenalty += 3;
-                    }
-                }
+                
                 if (Physics.Raycast(ray, out hit, 100))
                 {
                     worldPoint = new Vector3(worldPoint.x, hit.point.y, worldPoint.z); //sets the Y position of the node to the Y hit point of the ray
                 }
                 walkable = !(Physics.CheckSphere(worldPoint, nodeRadius, unwalkableMask));
 
-                /*if (hit.transform.gameObject.layer == 8) //if the gameobject is on the unwalkable layer, mark it as unwalkable
+                if (worldPoint.y > 12)
                 {
-                    Debug.Log("### hit an unwalkable object");
+                    int penaltyVal = (int)(((int)worldPoint.y - 12) * 0.4);
+                    movementPenalty += penaltyVal;
+                }
+                if (worldPoint.y <= 2.6)
+                {
                     walkable = false;
                 }
-                else
-                {
-                    Debug.Log("XX not hit");
-                    walkable = true;
-                }*/
+                
 
                 if (hit.point.y < 2)
                 {
@@ -207,6 +200,7 @@ public class Grid : MonoBehaviour
         int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
         int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
 
+        Debug.Log(grid[x,y].worldPosition);
         return grid[x, y];
     }
 
