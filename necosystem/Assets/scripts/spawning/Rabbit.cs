@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class Rabbit : AnimalAttributes
 {
+    #region Food methods
     [ContextMenu("R - Locate nearest food")]
-    public void GetClosestFood() //locates the nearest grass item (rabbit)
+    public void GetClosestFood() //locates the nearest grass item
     {
         nearestGrass = null;
         allGrass = null;
@@ -28,13 +29,13 @@ public class Rabbit : AnimalAttributes
         }
     }
 
-
     [ContextMenu("R - Pathfind food")]
     public override void LocateFood()
     {
+        animator.SetBool("RabbitWalking", true);
+        animator.SetBool("RabbitEat", false);
         PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
-
 
     [ContextMenu("R - Eat food")]
     public override void EatFood() //destroys/eats grass object
@@ -53,63 +54,64 @@ public class Rabbit : AnimalAttributes
 
             this.gameObject.GetComponent<AnimalAttributes>().health = 100;
 
-
-            /*if (this.gameObject.GetComponent<Rabbit>().health > 100) //keep within 0-100
-            {
-                this.gameObject.GetComponent<Rabbit>().health -= (this.gameObject.GetComponent<AnimalAttributes>().health - 100);
-            }*/
-            //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-
+            animator.SetBool("RabbitEat", false);
+            animator.SetBool("RabbitWalking", false);
         }
     }
-    /*************************
-    [ContextMenu("R - Random movement")]
-    public void RandomMovement()
+    #endregion 
+
+
+    #region Water methods
+    [ContextMenu("R - Locate nearest water")]
+    public void GetClosestWater() //locates the nearest water
     {
-        
-        StopCoroutine(DelayForRandomMovement());
-        StopCoroutine(DelayForStopRandomMovement());
-        StopCoroutine("FollowPath");
-        
+        //////////// CALCULATE NEAREST NODE BELOW Y = 2.5
 
-        StartCoroutine(DelayForRandomMovement());
-        StartCoroutine(DelayForStopRandomMovement());
-    }
-    public override IEnumerator DelayForRandomMovement()
-    {
-        //yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 6f)); //wait 1-6 seconds
+        nearestGrass = null;
+        allGrass = null;
 
-        GameObject randomPosObj = Instantiate(randomMovementPrefab);
-        randomPosObj.transform.position = new Vector3(Random.Range(transform.position.x - 30, transform.position.x + 30), 50, Random.Range(transform.position.z - 30, transform.position.z + 30)); //instantiate empty prefab in random pos around the rabbit
-        target = randomPosObj.transform; //target = the instantiated prefab
+        allGrass = GameObject.FindGameObjectsWithTag("Grass");
 
-        Debug.Log("starting movement");
+        distance = 0;
+        nearestDistance = 10000;
 
-        LocateFood();
-
-        Destroy(randomPosObj);
-        yield return null;
-    }
-    IEnumerator DelayForStopRandomMovement()
-    {
-        yield return new WaitForSeconds(Random.Range(1f, 3f)); //wait 3-6 seconds
-        Debug.Log("stopping movement");
-        StopCoroutine(DelayForRandomMovement());
-        StopCoroutine("FollowPath");
-    }
-
-    private void Update()
-    {
-        randNum = Random.Range(5, 10);
-        /*if (randNum == 1)
+        for (int i = 0; i < allGrass.Length; i++)
         {
-            //RandomMovement();
+            distance = Vector3.Distance(this.transform.position, allGrass[i].transform.position);
+
+            if (distance < nearestDistance)
+            {
+                nearestGrass = allGrass[i];
+                nearestDistance = distance;
+            }
         }
     }
 
-    private void Start()
+    [ContextMenu("R - Pathfind food")]
+    public override void LocateWater()
     {
-        //InvokeRepeating("RandomMovement", Random.Range(5, 10), randNum);
+        animator.SetBool("RabbitWalking", true);
+        animator.SetBool("RabbitEat", false);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
-    *////////////////////////////////
+
+    [ContextMenu("R - Drink Water")]
+    public override void DrinkWater() //destroys/eats grass object
+    {
+        this.gameObject.GetComponent<Rabbit>().GetClosestWater();
+
+        if (nearestDistance < 3)
+        {
+            isFindingWater = false;
+            thirsty = false;
+
+            Debug.Log("drinking water");
+
+            this.gameObject.GetComponent<AnimalAttributes>().thirst = 100;
+
+            animator.SetBool("RabbitEat", false);
+            animator.SetBool("RabbitWalking", false);
+        }
+    }
+    #endregion
 }
