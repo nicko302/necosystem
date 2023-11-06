@@ -128,6 +128,9 @@ MonoBehaviour:
   target: {fileID: 7806990491278317110, guid: 77eb8070c19c58447beef5e91421c36a, type: 3}
   isFindingFood: 0
   hungry: 0
+  stop: 0
+  randomMovementPrefab: {fileID: 0}
+  randomMoveChance: 100
 --- !u!54 &5764168073986214054
 Rigidbody:
   m_ObjectHideFlags: 0

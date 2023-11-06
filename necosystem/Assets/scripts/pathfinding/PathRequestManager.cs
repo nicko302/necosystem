@@ -1,10 +1,11 @@
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System;
 
 public class PathRequestManager : MonoBehaviour
 {
+
     Queue<PathRequest> pathRequestQueue = new Queue<PathRequest>();
     PathRequest currentPathRequest;
 
@@ -13,21 +14,20 @@ public class PathRequestManager : MonoBehaviour
 
     bool isProcessingPath;
 
-    private void Awake()
+    void Awake()
     {
         instance = this;
         pathfinding = GetComponent<Pathfinding>();
     }
 
-    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback) //requests a path to be processed & enqueues it
+    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback)
     {
-        Debug.Log("Path requested");
         PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
         instance.pathRequestQueue.Enqueue(newRequest);
         instance.TryProcessNext();
     }
 
-    void TryProcessNext() //attempts to start pathfinding with the first queued request
+    void TryProcessNext()
     {
         if (!isProcessingPath && pathRequestQueue.Count > 0)
         {
@@ -56,5 +56,6 @@ public class PathRequestManager : MonoBehaviour
             pathEnd = _end;
             callback = _callback;
         }
+
     }
 }

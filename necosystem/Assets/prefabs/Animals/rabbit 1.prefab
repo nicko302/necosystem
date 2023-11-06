@@ -728,6 +728,9 @@ GameObject:
   - component: {fileID: 5171119864095032166}
   - component: {fileID: 6737985620155815280}
   - component: {fileID: 331982134594621176}
+  - component: {fileID: 5144293012286350959}
+  - component: {fileID: 4437987791847875149}
+  - component: {fileID: 6611408649077464873}
   m_Layer: 0
   m_Name: rabbit 1
   m_TagString: Untagged
@@ -776,11 +779,19 @@ MonoBehaviour:
   nearestGrass: {fileID: 0}
   distance: 0
   nearestDistance: 10000
-  target: {fileID: 7806990491278317110, guid: 77eb8070c19c58447beef5e91421c36a, type: 3}
+  target: {x: 0, y: 0, z: 0}
   isFindingFood: 0
   hungry: 0
   stop: 0
   randomMovementPrefab: {fileID: 704611657350098030, guid: 73c0f98b34c66014982993b8934e9601, type: 3}
+  randNum: 0
+  chance: 2000
+  minInterval: 1
+  maxInterval: 6
+  timer: 0
+  boundSize: 240
+  height: 50
+  moving: 0
 --- !u!114 &5171119864095032166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -809,7 +820,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!65 &331982134594621176
 BoxCollider:
@@ -822,8 +833,71 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 2.2314596, z: 2.324083}
-  m_Center: {x: 0, y: 0.61572933, z: -0.20852467}
+  m_Size: {x: 1, y: 2.001763, z: 1.8630497}
+  m_Center: {x: 0, y: 0.962791, z: 0.021992033}
+--- !u!114 &5144293012286350959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7151781954798594762}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5525dd27063b424478592e71ac41cf2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementSpeed: 7
+  rotationSpeed: 100
+  objCheckDiameter: 10
+  isWandering: 0
+  isHungry: 0
+  isWalking: 0
+  unwalkableMask:
+    serializedVersion: 2
+    m_Bits: 256
+  seaMask:
+    serializedVersion: 2
+    m_Bits: 512
+  terrainChunkMask:
+    serializedVersion: 2
+    m_Bits: 0
+  posForSeaRaycast: {fileID: 0}
+--- !u!136 &4437987791847875149
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7151781954798594762}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  m_Radius: 0.928352
+  m_Height: 2.0317893
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9457417, z: -0.061858647}
+--- !u!95 &6611408649077464873
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7151781954798594762}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 053f9293c3919e54ebc5251ec8a8e17c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7300315938978435872
 GameObject:
   m_ObjectHideFlags: 0

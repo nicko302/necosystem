@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class Rabbit : AnimalAttributes
 {
+    #region Food methods
     [ContextMenu("R - Locate nearest food")]
-    public void GetClosestFood() //locates the nearest grass item (rabbit)
+    public void GetClosestFood() //locates the nearest grass item
     {
         nearestGrass = null;
         allGrass = null;
@@ -28,16 +29,12 @@ public class Rabbit : AnimalAttributes
         }
     }
 
-
     [ContextMenu("R - Pathfind food")]
     public override void LocateFood()
     {
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
-    }
-
-    public  void RandomPathfind()
-    {
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+        animator.SetBool("RabbitWalking", true);
+        animator.SetBool("RabbitEat", false);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
     [ContextMenu("R - Eat food")]
@@ -45,24 +42,76 @@ public class Rabbit : AnimalAttributes
     {
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
-        if (nearestDistance < 2)
+        if (nearestDistance < 3)
         {
             isFindingFood = false;
             hungry = false;
 
             Debug.Log("destroying grass");
-            Destroy(nearestGrass.transform.parent.gameObject);
+            //Destroy(nearestGrass.transform.parent.gameObject);
+            nearestGrass.transform.parent.position = new Vector3(nearestGrass.transform.parent.position.x, 200, nearestGrass.transform.parent.position.z);
             Debug.Log("grass destroyed");
 
             this.gameObject.GetComponent<AnimalAttributes>().health = 100;
 
-
-            /*if (this.gameObject.GetComponent<Rabbit>().health > 100) //keep within 0-100
-            {
-                this.gameObject.GetComponent<Rabbit>().health -= (this.gameObject.GetComponent<AnimalAttributes>().health - 100);
-            }*/
-            //this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-
+            animator.SetBool("RabbitEat", false);
+            animator.SetBool("RabbitWalking", false);
         }
     }
+    #endregion 
+
+
+    #region Water methods
+    [ContextMenu("R - Locate nearest water")]
+    public void GetClosestWater() //locates the nearest water
+    {
+        //////////// CALCULATE NEAREST NODE BELOW Y = 2.5
+
+        nearestGrass = null;
+        allGrass = null;
+
+        allGrass = GameObject.FindGameObjectsWithTag("Grass");
+
+        distance = 0;
+        nearestDistance = 10000;
+
+        for (int i = 0; i < allGrass.Length; i++)
+        {
+            distance = Vector3.Distance(this.transform.position, allGrass[i].transform.position);
+
+            if (distance < nearestDistance)
+            {
+                nearestGrass = allGrass[i];
+                nearestDistance = distance;
+            }
+        }
+    }
+
+    [ContextMenu("R - Pathfind food")]
+    public override void LocateWater()
+    {
+        animator.SetBool("RabbitWalking", true);
+        animator.SetBool("RabbitEat", false);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+    }
+
+    [ContextMenu("R - Drink Water")]
+    public override void DrinkWater() //destroys/eats grass object
+    {
+        this.gameObject.GetComponent<Rabbit>().GetClosestWater();
+
+        if (nearestDistance < 3)
+        {
+            isFindingWater = false;
+            thirsty = false;
+
+            Debug.Log("drinking water");
+
+            this.gameObject.GetComponent<AnimalAttributes>().thirst = 100;
+
+            animator.SetBool("RabbitEat", false);
+            animator.SetBool("RabbitWalking", false);
+        }
+    }
+    #endregion
 }
