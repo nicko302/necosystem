@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public class Heap<T> where T : IHeapItem<T> //using a heap to keep track of nodes as an optimisation for the A* algorithm
+/// <summary>
+/// Using a heap to keep track of nodes with low f costs as an optimisation for the A* algorithm
+/// </summary>
+public class Heap<T> where T : IHeapItem<T>
 {
     T[] items;
     int currentItemCount;
@@ -56,7 +59,7 @@ public class Heap<T> where T : IHeapItem<T> //using a heap to keep track of node
         }
     }
 
-    void SortDown(T item) //checks if an item should be positioned lower on the heap
+    void SortDown(T item) // checks if an item should be positioned lower on the heap
     {
         while (true)
         {
@@ -94,7 +97,7 @@ public class Heap<T> where T : IHeapItem<T> //using a heap to keep track of node
         }
     }
 
-    void SortUp(T item) //checks if an item should be positioned higher on the heap
+    void SortUp(T item) // checks if an item should be positioned higher on the heap
     {
         int parentIndex = (item.HeapIndex - 1) / 2;
 
@@ -114,7 +117,7 @@ public class Heap<T> where T : IHeapItem<T> //using a heap to keep track of node
         }
     }
 
-    void Swap(T itemA, T itemB) //swaps itemA with itemB
+    void Swap(T itemA, T itemB) // swaps itemA with itemB
     {
         items[itemA.HeapIndex] = itemB;
         items[itemB.HeapIndex] = itemA;

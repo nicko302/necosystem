@@ -24,10 +24,10 @@ public class PathRequestManager : MonoBehaviour
     {
         PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
         instance.pathRequestQueue.Enqueue(newRequest);
-        instance.TryProcessNext();
+        instance.ProcessNextPath();
     }
 
-    void TryProcessNext()
+    void ProcessNextPath()
     {
         if (!isProcessingPath && pathRequestQueue.Count > 0)
         {
@@ -41,7 +41,7 @@ public class PathRequestManager : MonoBehaviour
     {
         currentPathRequest.callback(path, success);
         isProcessingPath = false;
-        TryProcessNext();
+        ProcessNextPath();
     }
 
     struct PathRequest
