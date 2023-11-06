@@ -22,7 +22,12 @@ public class Pathfinding : MonoBehaviour
         StartCoroutine(FindPath(startPos, targetPos));
     }
 
-    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos) //locates each node of the path - i.e. A* algorithm
+    /// <summary>
+    /// Locates each node of the path using the A* algorithm
+    /// </summary>
+    /// <param name="startPos"> The location in which the path starts </param>
+    /// <param name="targetPos"> The location in which the path aims to reach </param>
+    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos)
     {
         Vector3[] waypoints = new Vector3[0];
         bool pathSuccess = false;
@@ -32,8 +37,8 @@ public class Pathfinding : MonoBehaviour
 
         if (targetNode.walkable)
         {
-            Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
-            HashSet<Node> closedSet = new HashSet<Node>();
+            Heap<Node> openSet = new Heap<Node>(grid.MaxSize); // the nodes that need to be checked
+            HashSet<Node> closedSet = new HashSet<Node>(); // the nodes that have already been checked
             openSet.Add(startNode);
 
             while (openSet.Count > 0)
@@ -43,7 +48,7 @@ public class Pathfinding : MonoBehaviour
 
                 if (currentNode == targetNode)
                 {
-                    pathSuccess = true;
+                    pathSuccess = true; // path is successful if the target node has been reached
                     break;
                 }
 
@@ -51,11 +56,11 @@ public class Pathfinding : MonoBehaviour
                 {
                     if (!neighbour.walkable || closedSet.Contains(neighbour))
                     {
-                        continue; //skip unnecessary nodes
+                        continue; // skips unnecessary nodes
                     }
 
                     int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour) + neighbour.movementPenalty;
-                    if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) //checks the node has lowest cost out of neighbours
+                    if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) // checks if the node has lowest cost out of its neighbours
                     {
                         neighbour.gCost = newMovementCostToNeighbour;
                         neighbour.hCost = GetDistance(neighbour, targetNode);
@@ -70,21 +75,28 @@ public class Pathfinding : MonoBehaviour
             }
         }
         yield return null;
+
+        // if a path is found, the path is then reversed and simplified
         if (pathSuccess)
         {
             UnityEngine.Debug.Log("Path Success - FindPath");
 
             waypoints = RetracePath(startNode, targetNode);
         }
-        requestManager.FinishedProcessingPath(waypoints, pathSuccess);
+        requestManager.FinishedProcessingPath(waypoints, pathSuccess); //sends the completed path to the PathRequestManager script
 
     }
 
+    /// <summary>
+    /// Retraces and reverses the path into a list
+    /// </summary>
     Vector3[] RetracePath(Node startnode, Node endNode)
     {
         List<Node> path = new List<Node> ();
         Node currentNode = endNode;
 
+        // iteratively adds the nodes to a list and moves to the parent of that node
+        // (i.e. works backwards from the target to the start node)
         while (currentNode != startnode)
         {
             path.Add(currentNode);
@@ -95,11 +107,15 @@ public class Pathfinding : MonoBehaviour
         return waypoints;
     }
 
+    /// <summary>
+    /// Simplifies the path
+    /// </summary>
     Vector3[] SimplifyPath(List<Node> path)
     {
         List<Vector3> waypoints = new List<Vector3>();
         Vector2 directionOld = Vector2.zero;
 
+        //iterates through the points in the path, finding whether the gradient/direction between two nodes has changed
         for (int i = 1; i < path.Count; i++)
         {
             Vector2 directionNew = new Vector2(path[i - 1].gridX - path[i].gridX, path[i - 1].gridY - path[i].gridY);
@@ -114,6 +130,9 @@ public class Pathfinding : MonoBehaviour
         return waypoints.ToArray();
     }
 
+    /// <summary>
+    /// Uses formula to calculate the distance between two nodes
+    /// </summary>
     int GetDistance(Node nodeA, Node nodeB)
     {
         int dstX = Mathf.Abs(nodeA.gridX - nodeB.gridX);

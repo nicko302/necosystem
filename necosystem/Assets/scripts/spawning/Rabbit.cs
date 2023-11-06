@@ -58,10 +58,10 @@ public class Rabbit : AnimalAttributes
             animator.SetBool("RabbitWalking", false);
         }
     }
-    #endregion 
-
+    #endregion
 
     #region Water methods
+    /************************************ Rabbit drink water
     [ContextMenu("R - Locate nearest water")]
     public void GetClosestWater() //locates the nearest water
     {
@@ -95,6 +95,7 @@ public class Rabbit : AnimalAttributes
         PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
+    
     [ContextMenu("R - Drink Water")]
     public override void DrinkWater() //destroys/eats grass object
     {
@@ -102,8 +103,8 @@ public class Rabbit : AnimalAttributes
 
         if (nearestDistance < 3)
         {
-            isFindingWater = false;
-            thirsty = false;
+            //isFindingWater = false;
+            //thirsty = false;
 
             Debug.Log("drinking water");
 
@@ -113,5 +114,6 @@ public class Rabbit : AnimalAttributes
             animator.SetBool("RabbitWalking", false);
         }
     }
+    *////////////////////////////////////////
     #endregion
 }
