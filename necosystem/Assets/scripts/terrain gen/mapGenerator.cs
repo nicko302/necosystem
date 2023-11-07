@@ -147,7 +147,7 @@ public class mapGenerator : MonoBehaviour
 
     public MapData GenerateMapData(Vector2 centre)
     {
-        float[,] noiseMap = noise.generateNoiseMap(mapChunkSize+2, mapChunkSize+2, noiseData.seed, noiseData.noiseScale, noiseData.octaves, noiseData.persistance, noiseData.lacunarity, centre + noiseData.offset, noiseData.normalizeMode); //pass variables into noise generation function
+        float[,] noiseMap = Noise.generateNoiseMap(mapChunkSize+2, mapChunkSize+2, noiseData.seed, noiseData.noiseScale, noiseData.octaves, noiseData.persistance, noiseData.lacunarity, centre + noiseData.offset, noiseData.normalizeMode); //pass variables into noise generation function
 
         if (terrainData.useFalloff)
         {

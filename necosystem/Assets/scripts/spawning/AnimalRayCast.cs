@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 public class AnimalRayCast : MonoBehaviour
 {
-    public AnimalAttributes animalAttributes;
+    public Animal animalAttributes;
     public GameObject obj;
     void Start()
     {
