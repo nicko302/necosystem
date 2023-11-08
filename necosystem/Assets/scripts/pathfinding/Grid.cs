@@ -24,13 +24,22 @@ public class Grid : MonoBehaviour
 
     bool visible = true;
 
+    public int MaxSize
+    {
+        get
+        {
+            return gridSizeX * gridSizeY;
+        }
+    }
+
+
     private void Awake()
     {
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
 
-        foreach (TerrainType region in walkableRegions)
+        foreach (TerrainType region in walkableRegions) //adds every region given in the walkable regions array to the dictionary and assigns it a penalty value
         {
             walkableMask.value |= region.terrainMask.value;
             walkableRegionsDictionary.Add((int)Mathf.Log(region.terrainMask.value, 2), region.terrainPenalty);
@@ -43,6 +52,9 @@ public class Grid : MonoBehaviour
         StartCoroutine(WaitSeconds());
     }
 
+    /// <summary>
+    /// Delays the grid creation to wait for the terrain mesh to be generated
+    /// </summary>
     IEnumerator WaitSeconds()
     {
         Debug.Log("Grid is creating");
@@ -50,15 +62,9 @@ public class Grid : MonoBehaviour
         CreateGrid();
     }
 
-    public int MaxSize
-    {
-        get
-        {
-            return gridSizeX * gridSizeY;
-        }
-    }
-
-    /// <summary> Creates the grid of nodes to be used for pathfinding, and determines if a node is walkable or unwalkable </summary>
+    /// <summary>
+    /// Creates the grid of nodes to be used for pathfinding, and determines if a node is walkable or unwalkable
+    /// </summary>
     void CreateGrid()
     {
         grid = new Node[gridSizeX, gridSizeY]; // creation of the grid (a 2D array of Nodes)

@@ -98,11 +98,10 @@ public class mapGenerator : MonoBehaviour
     void MapDataThread(Vector2 centre, Action<MapData> callback)
     {
         MapData mapData = GenerateMapData(centre);
-        lock (mapDataThreadInfoQueue) //thread can only be executed one at a time
+        lock (mapDataThreadInfoQueue) // thread can only be executed one at a time
         {
-            mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData)); //add new threading task to queue
+            mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData)); // add new threading task to queue
         }
-        
     }
 
     public void RequestMeshData(MapData mapData, int lod, Action<MeshData> callback)
@@ -162,11 +161,11 @@ public class mapGenerator : MonoBehaviour
                         noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
         }
 
-        return new MapData(noiseMap); //return noisemap & colourmap to be used in DrawMapInEditor()
+        return new MapData(noiseMap); // return noisemap & colourmap to be used in DrawMapInEditor()
 
     }
 
-    private void OnValidate() //called automatically when a variable is changed in inspector
+    private void OnValidate() // called automatically when a variable is changed in inspector
     {
         if (terrainData != null)
         {
@@ -198,7 +197,7 @@ public class mapGenerator : MonoBehaviour
     }
 }
 
-public struct MapData //stores the heightmap values to be passed between methods
+public struct MapData // stores the heightmap values to be passed between methods
 {
     public readonly float[,] heightMap;
 

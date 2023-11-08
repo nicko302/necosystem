@@ -20,6 +20,9 @@ public class PathRequestManager : MonoBehaviour
         pathfinding = GetComponent<Pathfinding>();
     }
 
+    /// <summary>
+    /// Adds the next path request to the end of the queue
+    /// </summary>
     public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback)
     {
         PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
@@ -27,6 +30,9 @@ public class PathRequestManager : MonoBehaviour
         instance.ProcessNextPath();
     }
 
+    /// <summary>
+    /// Starts the firs path request in the queue and dequeues it
+    /// </summary>
     void ProcessNextPath()
     {
         if (!isProcessingPath && pathRequestQueue.Count > 0)
@@ -44,6 +50,9 @@ public class PathRequestManager : MonoBehaviour
         ProcessNextPath();
     }
 
+    /// <summary>
+    /// Struct to store the necessary variables for a path request
+    /// </summary>
     struct PathRequest
     {
         public Vector3 pathStart;
