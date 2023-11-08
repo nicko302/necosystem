@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Rabbit : AnimalAttributes
+public class Rabbit : Animal
 {
     #region Food methods
     [ContextMenu("R - Locate nearest food")]
@@ -52,7 +52,7 @@ public class Rabbit : AnimalAttributes
             nearestGrass.transform.parent.position = new Vector3(nearestGrass.transform.parent.position.x, 200, nearestGrass.transform.parent.position.z);
             Debug.Log("grass destroyed");
 
-            this.gameObject.GetComponent<AnimalAttributes>().health = 100;
+            this.gameObject.GetComponent<Animal>().health = 100;
 
             animator.SetBool("RabbitEat", false);
             animator.SetBool("RabbitWalking", false);

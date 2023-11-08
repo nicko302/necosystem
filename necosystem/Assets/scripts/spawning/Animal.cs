@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AnimalAttributes : MonoBehaviour
+public class Animal : MonoBehaviour
 {
     [Header("Needs")]
     [Tooltip("The hunger and health of the animal")]
@@ -21,15 +21,16 @@ public class AnimalAttributes : MonoBehaviour
     [Header("BirthAttributes")]
     [Tooltip("How fast the animal can travel")]
     [Range(30, 70)]
-    public int intSpeed;
+    public int intSpeed; // an easier value of speed to compare and alter
+
     public float turnDst = 5;
     public float turnSpeed = 3;
     public float stoppingDst = 10;
-    public float speed
+    public float speed // the actual value of speed to be used
     {
         get { return (float)intSpeed / 5f; }
     }
-    [Tooltip("How much damage the animal does to others")]
+    [Tooltip("How much damage the animal can do to others")]
     [Range(1, 9)]
     public int strength;
 
@@ -37,13 +38,13 @@ public class AnimalAttributes : MonoBehaviour
     [Header("Pathfinding variables")]
     public Vector3 target;
 
-    const float pathUpdateMoveThreshold = .5f;
-    const float minPathUpdateTime = .2f;
-    public float distance;
-    public float nearestDistance = 10000;
+    protected const float pathUpdateMoveThreshold = .5f;
+    protected const float minPathUpdateTime = .2f;
+    protected float distance;
+    protected float nearestDistance = 10000;
 
-    public GameObject[] allGrass;
-    public GameObject nearestGrass;
+    protected GameObject[] allGrass;
+    protected GameObject nearestGrass;
     public bool isFindingFood = false;
     public bool hungry = false;
 
@@ -55,21 +56,21 @@ public class AnimalAttributes : MonoBehaviour
     *///////////////////////////////////////
 
 
-    [Header("Random movement variables")]
-    public int randNum = 0;
+    [Header("Wander variables")]
+    protected int randNum = 0;
     [SerializeField]
     [Tooltip("X / 10,000 chance to wander")]
-    public int chance = 1;
+    protected int chance = 1;
     [SerializeField]
-    public float minInterval;
+    protected float minInterval;
     [SerializeField]
-    public float maxInterval;
-    public float timer;
+    protected float maxInterval;
+    protected float timer;
 
     [SerializeField]
-    public float boundSize = 240f;
+    protected float boundSize = 240f;
     [SerializeField]
-    public float height = 50f;
+    protected float height = 50f;
     [SerializeField]
     private bool moving = false;
 
@@ -83,16 +84,7 @@ public class AnimalAttributes : MonoBehaviour
 
     Grid grid;
 
-    public AnimalAttributes() //default values
-    {
-        health = 100;
-        //thirst = 100;
-        libido = 100;
-        strength = 5;
-        intSpeed = 50;
-    }
-
-    [ContextMenu("Set Default Values")] //method to assign default values
+    [ContextMenu("Set Default Values")] // method to assign default values for debugging
     public void SetDefaults()
     {
         health = 100;
@@ -103,7 +95,7 @@ public class AnimalAttributes : MonoBehaviour
     }
 
 
-    #region Animal Methods
+    #region Animal functions
 
     public virtual void LocateFood() //default find food method to be overwritten
     {
@@ -113,13 +105,15 @@ public class AnimalAttributes : MonoBehaviour
 
     public virtual void EatFood() //default eat food method to be overwritten
     {
-        this.gameObject.GetComponent<AnimalAttributes>().health += 20;
+        this.gameObject.GetComponent<Animal>().health += 20;
 
-        if (this.gameObject.GetComponent<AnimalAttributes>().health > 100) //keep within 0-100
+        if (this.gameObject.GetComponent<Animal>().health > 100) //keep within 0-100
         {
-            this.gameObject.GetComponent<AnimalAttributes>().health -= (this.gameObject.GetComponent<AnimalAttributes>().health - 100);
+            this.gameObject.GetComponent<Animal>().health -= (this.gameObject.GetComponent<Animal>().health - 100);
         }
     }
+
+    /************************ drink water
 
     public virtual void LocateWater() //default find water method to be overwritten
     {
@@ -127,7 +121,6 @@ public class AnimalAttributes : MonoBehaviour
         PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
-    /************************ drink water
     public virtual void DrinkWater() //default drink water method to be overwritten
     {
         this.gameObject.GetComponent<AnimalAttributes>().thirst += 20;
@@ -252,7 +245,7 @@ public class AnimalAttributes : MonoBehaviour
 
     private void CheckHunger() //checks if the health value meets the hungry threshold
     {
-        if (this.gameObject.GetComponent<AnimalAttributes>().health <= 50)
+        if (this.gameObject.GetComponent<Animal>().health <= 50)
         {
             Debug.Log("hungry");
             hungry = true;
@@ -261,7 +254,7 @@ public class AnimalAttributes : MonoBehaviour
 
     private void CheckLibido() //checks if the libido value meets the ready to mate threshold
     {
-        if (this.gameObject.GetComponent<AnimalAttributes>().libido <= 30)
+        if (this.gameObject.GetComponent<Animal>().libido <= 30)
         {
             Debug.Log("ready to mate");
             readyToMate = true;
@@ -283,7 +276,7 @@ public class AnimalAttributes : MonoBehaviour
         StartCoroutine(UpdatePath());
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
         target = nearestGrass.transform.position;
-        Debug.Log("Finding food");
+        Debug.Log("Finding food");f
         this.gameObject.GetComponent<Rabbit>().LocateFood();
     }
 

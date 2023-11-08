@@ -5,7 +5,7 @@ using System.Collections;
 public class noiseData : UpdatableData
 {
 
-    public noise.NormalizeMode normalizeMode;
+    public Noise.NormalizeMode normalizeMode;
 
     public float noiseScale;
 
