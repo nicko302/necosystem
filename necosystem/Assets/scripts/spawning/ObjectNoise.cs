@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
+using Unity.VisualScripting;
 
 public class ObjectNoise : MonoBehaviour
 {
@@ -21,21 +22,15 @@ public class ObjectNoise : MonoBehaviour
     public float minGrassScale = .7f;
     public float maxGrassScale = 1.3f;
     public List<Transform> grassTransforms = new List<Transform>();
+    public List<GameObject> allGrass = new List<GameObject>();
+    public GrassRegrowth grassRegrowth;
+
 
     [Header("Objects")]
     public GameObject[] objectPrefabs;
     public int objectDensity;
     public float minObjectScale = .7f;
     public float maxObjectScale = 1.3f;
-
-    [Header("Grass regrowth")]
-    [SerializeField]
-    private float timer = 0;
-    [SerializeField]
-    private float minInterval;
-    [SerializeField]
-    private float maxInterval;
-    private bool canRegrow = false;
 
 
     public int mapChunkSize
@@ -58,6 +53,7 @@ public class ObjectNoise : MonoBehaviour
                     tree.transform.position = new Vector3(x, 60, y);
                     tree.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360f), 0);
                     tree.transform.localScale = Vector3.one * UnityEngine.Random.Range(minTreeScale, maxTreeScale);
+                    tree.transform.parent = GameObject.Find("Trees").transform;
                 }
             }
     }
@@ -69,11 +65,13 @@ public class ObjectNoise : MonoBehaviour
                 if (UnityEngine.Random.Range(1, grassDensity) == 1)
                 {
                     GameObject grassPrefab = grassPrefabs[UnityEngine.Random.Range(0, grassPrefabs.Length)];
-                    GameObject grass = Instantiate(grassPrefab, this.transform);
+                    GameObject grass = Instantiate(grassPrefab, this.transform) as GameObject;
                     grassTransforms.Add(grass.transform);
+                    allGrass.Add(grass);
                     grass.transform.position = new Vector3(x, 60, y);
                     grass.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360f), 0);
                     grass.transform.localScale = Vector3.one * UnityEngine.Random.Range(minGrassScale, maxGrassScale);
+                    grass.transform.parent = GameObject.Find("Grass").transform;
                 }
             }
     }
@@ -89,8 +87,25 @@ public class ObjectNoise : MonoBehaviour
                     obj.transform.position = new Vector3(x, 60, y);
                     obj.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360f), 0);
                     obj.transform.localScale = Vector3.one * UnityEngine.Random.Range(minObjectScale, maxObjectScale);
+                    obj.transform.parent = GameObject.Find("Objects").transform;
                 }
             }
+    }
+
+    void UpdateGrassList()
+    {
+        for (int i = 0; i < allGrass.Count; i++)
+        {
+            var grass = allGrass[i];
+            if (grass == null)
+            {
+                allGrass.RemoveAt(i); // remove the null at this index
+                i--;
+                continue; // move to the next iteration
+            }
+        }
+        grassRegrowth.canRegrow = true;
+
     }
 
 
@@ -104,49 +119,13 @@ public class ObjectNoise : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (canRegrow)
-        {
-            if (timer <= 0)
-            {
-                // if timer reaches zero, a single grass will regrow
-                GrassRegrowth();
-                timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
-            }
-            else
-            {
-                // otherwise, if the timer is greater than zero, reduce the timer by Time.deltaTime (the time in seconds since the last frame)
-                timer -= Time.deltaTime; // timer counts down
-            }
-        }
-    }
-
     IEnumerator WaitSeconds() // delay object generation to allow terrain to generate beforehand
     {
         yield return new WaitForSeconds(2);
         GenerateObjects();
         GenerateTrees();
         GenerateGrass();
-        yield return new WaitForSeconds(10);
-        canRegrow = true;
-    }
-
-    void GrassRegrowth()
-    {
-        // instantiate grass object & assign scale and rotation
-        GameObject grassPrefab = grassPrefabs[UnityEngine.Random.Range(0, grassPrefabs.Length)];
-        GameObject grass = Instantiate(grassPrefab, this.transform);
-        grassTransforms.Add(grass.transform);
-        grass.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360f), 0);
-        grass.transform.localScale = Vector3.one * 0.3f;
-
-        // select random location near to a current grass object
-        int maxIndex = grassTransforms.IndexOf(grassTransforms.Max());
-        int minIndex = grassTransforms.IndexOf(grassTransforms.Min());
-        int posOffset = UnityEngine.Random.Range(2, 5);
-        grass.transform.position = grassTransforms[UnityEngine.Random.Range(minIndex, maxIndex)].transform.position + new Vector3 (posOffset, 20, posOffset);
-
-        Debug.Log("grass regrown at " + grass.transform.position);
+        yield return new WaitForSeconds(5);
+        UpdateGrassList();
     }
 }

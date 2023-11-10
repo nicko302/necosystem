@@ -116,4 +116,43 @@ public class Rabbit : Animal
     }
     *////////////////////////////////////////
     #endregion
+
+    #region Other methods
+
+    public override void Die()
+    {
+        Debug.Log("dead");
+
+        // stop animal from pathfinding
+        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
+
+        // stop current animations
+        animator.SetBool("RabbitWalking", false);
+        animator.SetBool("RabbitEat", false);
+
+        // die
+        animator.SetBool("RabbitDie", true);
+
+        StartCoroutine("DestroyDelay");
+    }
+    public override IEnumerator DestroyDelay()
+    {
+        Debug.Log("dead");
+
+        // stop animal from pathfinding
+        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
+
+        // stop current animations
+        animator.SetBool("RabbitWalking", false);
+        animator.SetBool("RabbitEat", false);
+
+        // die
+        animator.SetBool("RabbitDie", true);
+        yield return new WaitForSeconds(5.9f);
+        Destroy(this.gameObject);
+    }
+
+    #endregion
 }

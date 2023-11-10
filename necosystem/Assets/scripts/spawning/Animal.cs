@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Animal : MonoBehaviour
@@ -33,6 +34,7 @@ public class Animal : MonoBehaviour
     [Tooltip("How much damage the animal can do to others")]
     [Range(1, 9)]
     public int strength;
+    public bool dead;
 
 
     [Header("Pathfinding variables")]
@@ -71,12 +73,11 @@ public class Animal : MonoBehaviour
     protected float boundSize = 240f;
     [SerializeField]
     protected float height = 50f;
-    [SerializeField]
-    private bool moving = false;
+    public bool moving = false;
 
     private RandomMovement randomMovement;
     private Rabbit rabbit;
-    private bool canWander = false;
+    public bool canWander = false;
     Path path;
 
     [Header("Animator")]
@@ -113,6 +114,26 @@ public class Animal : MonoBehaviour
         }
     }
 
+    public virtual void Die()
+    {
+        Debug.Log("dead");
+
+        // stop animal from pathfinding
+        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
+
+        // stop current animations
+
+        // die animation
+
+        StartCoroutine("DestroyDelay");
+    }
+    public virtual IEnumerator DestroyDelay()
+    {
+        yield return new WaitForSeconds(3);
+        Destroy(this.gameObject);
+    }
+
     /************************ drink water
 
     public virtual void LocateWater() //default find water method to be overwritten
@@ -140,6 +161,7 @@ public class Animal : MonoBehaviour
         {
             CheckHunger();
             CheckLibido();
+            CheckDeath();
             //CheckThirst();
             randomMovement.isHungry = false; //allow animal to wander
             animator.SetBool("RabbitEat", false);
@@ -200,6 +222,11 @@ public class Animal : MonoBehaviour
             isFindingWater = true;
         }
         */////////////////////////////////////
+
+        if (dead)
+        {
+            Die();
+        }
     }
 
     private void Start()
@@ -245,7 +272,7 @@ public class Animal : MonoBehaviour
 
     private void CheckHunger() //checks if the health value meets the hungry threshold
     {
-        if (this.gameObject.GetComponent<Animal>().health <= 50)
+        if (this.gameObject.GetComponent<Animal>().health <= 50 && this.gameObject.GetComponent<Animal>().health > 15)
         {
             Debug.Log("hungry");
             hungry = true;
@@ -258,6 +285,13 @@ public class Animal : MonoBehaviour
         {
             Debug.Log("ready to mate");
             readyToMate = true;
+        }
+    }
+    private void CheckDeath() //checks if the health value meets the hungry threshold
+    {
+        if (this.gameObject.GetComponent<Animal>().health <= 10)
+        {
+            dead = true;
         }
     }
 
