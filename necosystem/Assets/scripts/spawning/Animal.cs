@@ -42,16 +42,22 @@ public class Animal : MonoBehaviour
 
     protected const float pathUpdateMoveThreshold = .5f;
     protected const float minPathUpdateTime = .2f;
+    [SerializeField]
+
     protected float distance;
+    [SerializeField]
     protected float nearestDistance = 10000;
 
+    [SerializeField]
     protected GameObject[] allGrass;
     protected GameObject nearestGrass;
     public bool isFindingFood = false;
-    public bool hungry = false;
+    public bool isHungry = false;
 
     public bool isLookingForMate = false;
     public bool readyToMate = false;
+    public GameObject nearestMate;
+    public List<GameObject> allPotentialMates;
     /*************************************** water pathfinding variables
     public bool isFindingWater = false;
     public bool thirsty = false;
@@ -73,17 +79,20 @@ public class Animal : MonoBehaviour
     protected float boundSize = 240f;
     [SerializeField]
     protected float height = 50f;
-    public bool moving = false;
+    public bool moving = true;
 
-    private RandomMovement randomMovement;
     private Rabbit rabbit;
-    public bool canWander = false;
     Path path;
 
     [Header("Animator")]
     public Animator animator;
 
-    Grid grid;
+    [Header("Other")]
+    [SerializeField]
+    private bool startFunctions = false;
+    [SerializeField]
+    private bool runOnce = false;
+
 
     [ContextMenu("Set Default Values")] // method to assign default values for debugging
     public void SetDefaults()
@@ -98,7 +107,7 @@ public class Animal : MonoBehaviour
 
     #region Animal functions
 
-    public virtual void LocateFood() //default find food method to be overwritten
+    public virtual void Pathfind() //default find food method to be overwritten
     {
         Debug.Log("Finding food");
         PathRequestManager.RequestPath(transform.position, target, OnPathFound);
@@ -119,7 +128,7 @@ public class Animal : MonoBehaviour
         Debug.Log("dead");
 
         // stop animal from pathfinding
-        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        isHungry = false; isFindingFood = true; moving = true;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
@@ -157,36 +166,37 @@ public class Animal : MonoBehaviour
     #region Start/Update methods
     private void Update()
     {
-        if (!hungry && !readyToMate)// && thirsty == false)
+        if (startFunctions)
         {
-            CheckHunger();
-            CheckLibido();
-            CheckDeath();
-            //CheckThirst();
-            randomMovement.isHungry = false; //allow animal to wander
-            animator.SetBool("RabbitEat", false);
-
-            // checks every frame to see if the timer has reached zero
-            if (canWander)
+            if (!(isHungry || isLookingForMate))
             {
+                CheckHunger();
+                CheckLibido();
+                CheckDeath();
+
+                // checks every frame to see if the timer has reached zero
                 if (timer <= 0)
                 {
+                    // decrements needs values
                     health -= UnityEngine.Random.Range(3, 5);
                     //libido -= UnityEngine.Random.Range(2, 3);
                     //thirst -= UnityEngine.Random.Range(2, 4);
 
-                    if (!moving)
+                    if (!isHungry)
                     {
-                        // if animal is not moving AND the timer has reached zero, determine whether movement happens based off chance
-                        int randNum = UnityEngine.Random.Range(1, 10000);
-                        if (randNum <= chance)
+                        if (!moving)
                         {
-                            RandomMovement();
+                            // if animal is not moving AND the timer has reached zero, determine whether movement happens based off chance
+                            int randNum = UnityEngine.Random.Range(1, 10000);
+                            if (randNum <= chance)
+                            {
+                                RandomMovement();
+                            }
                         }
-                    }
-                    else //if animal is currently moving and timer reached zero
-                    {
-                        StopRandomMovement();
+                        else //if animal is currently moving and timer reached zero
+                        {
+                            StopRandomMovement();
+                        }
                     }
                     timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
                 }
@@ -196,42 +206,38 @@ public class Animal : MonoBehaviour
                     timer -= Time.deltaTime; // timer counts down
                 }
             }
-        }
 
-        if (hungry && !isFindingFood)
-        {
-            StartFoodPathfinding();
-            hungry = false;
-            isFindingFood = true;
-        }
+            
 
-        else if (readyToMate && !isLookingForMate)
-        {
-            //FindNearestMate();
-            //if (nearestMate != null)
-                //StartMatePathfinding();
-            readyToMate = false;
-            isLookingForMate = true;
-        }
 
-        /************************************* start water pathfinding
-        else if (thirsty && !isFindingWater)
-        {
-            StartWaterPathfinding();
-            thirsty = false;
-            isFindingWater = true;
-        }
-        */////////////////////////////////////
+            if (isHungry && !isFindingFood && !isLookingForMate)
+            {
+                StartFoodPathfinding();
+                moving = true;
+                isHungry = false;
+                isFindingFood = true;
+            }
 
-        if (dead)
-        {
-            Die();
+            else if (readyToMate && !isLookingForMate && !isHungry && !isFindingFood)
+            {
+                FindNearestMate(); // locate the nearest potential mate
+                if (nearestMate != null) // only pathfinds to a potential mate if the mate is also ready to mate
+                    StartMatePathfinding();
+
+                moving = true;
+                readyToMate = false;
+                isLookingForMate = true;
+            }
+
+            if (dead)
+            {
+                Die();
+            }
         }
     }
 
     private void Start()
     {
-        randomMovement = this.GetComponent<RandomMovement>();
         rabbit = this.GetComponent<Rabbit>();
         animator = this.GetComponent<Animator>();
 
@@ -239,6 +245,8 @@ public class Animal : MonoBehaviour
 
         minInterval = 1;
         maxInterval = 6;
+
+        startFunctions = false;
     }
     #endregion
 
@@ -247,7 +255,7 @@ public class Animal : MonoBehaviour
     IEnumerator DelayForWanderAI()
     {
         yield return new WaitForSeconds(4);
-        canWander = true;
+        startFunctions = true;
     }
 
     [ContextMenu("Random Movement")]
@@ -255,7 +263,7 @@ public class Animal : MonoBehaviour
     {
         Debug.Log("starting wander");
         target = new Vector3(UnityEngine.Random.Range(-boundSize, boundSize), height, UnityEngine.Random.Range(-boundSize, boundSize));
-        rabbit.LocateFood();
+        rabbit.Pathfind();
 
         moving = true;
     }
@@ -270,13 +278,15 @@ public class Animal : MonoBehaviour
         moving = false;
     }
 
-    private void CheckHunger() //checks if the health value meets the hungry threshold
+    private void CheckHunger() //checks if the health value meets the isHungry threshold
     {
         if (this.gameObject.GetComponent<Animal>().health <= 50 && this.gameObject.GetComponent<Animal>().health > 15)
         {
             Debug.Log("hungry");
-            hungry = true;
+            isHungry = true;
         }
+
+        //if(this.gameObject.GetComponent<Animal>().health < 35)
     }
 
     private void CheckLibido() //checks if the libido value meets the ready to mate threshold
@@ -287,11 +297,41 @@ public class Animal : MonoBehaviour
             readyToMate = true;
         }
     }
-    private void CheckDeath() //checks if the health value meets the hungry threshold
+    private void CheckDeath() //checks if the health value meets the isHungry threshold
     {
         if (this.gameObject.GetComponent<Animal>().health <= 10)
         {
             dead = true;
+        }
+    }
+
+    public virtual void FindNearestMate()
+    {
+        nearestMate = null;
+        allPotentialMates = null;
+
+        allPotentialMates.AddRange(GameObject.FindGameObjectsWithTag("Rabbit")); // adds all animals to list
+        for (int i = 0; i < allPotentialMates.Count; i++)
+        {
+            if (!allPotentialMates[i].gameObject.GetComponent<Animal>().readyToMate || allPotentialMates[i].gameObject.GetComponent<Animal>().isLookingForMate)
+            {
+                allPotentialMates.RemoveAt(i); // removes the animal from the list of mates if they are not also ready to mate or are currently looking for one
+                i--;
+            }
+        }
+
+        distance = 0;
+        nearestDistance = 10000;
+
+        for (int i = 0; i < allPotentialMates.Count; i++)
+        {
+            distance = Vector3.Distance(this.transform.position, allGrass[i].transform.position);
+
+            if (distance < nearestDistance)
+            {
+                nearestMate = allPotentialMates[i];
+                nearestDistance = distance;
+            }
         }
     }
 
@@ -311,27 +351,27 @@ public class Animal : MonoBehaviour
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
         target = nearestGrass.transform.position;
         Debug.Log("Finding food");f
-        this.gameObject.GetComponent<Rabbit>().LocateFood();
+        this.gameObject.GetComponent<Rabbit>().Pathfind();
     }
 
     *//////////////////////////
 
     private void StartFoodPathfinding() //calls the required subroutines to pathfind towards food
     {
+
         StartCoroutine(UpdatePath());
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
         target = nearestGrass.transform.position;
         Debug.Log("Finding food");
-        this.gameObject.GetComponent<Rabbit>().LocateFood();
+        this.gameObject.GetComponent<Rabbit>().Pathfind();
     }
 
     private void StartMatePathfinding() //calls the required subroutines to pathfind towards a mate
     {
         StartCoroutine(UpdatePath());
-        this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-        target = nearestGrass.transform.position;
-        Debug.Log("Finding food");
-        this.gameObject.GetComponent<Rabbit>().LocateFood();
+        target = nearestMate.transform.position;
+        Debug.Log("Finding mate");
+        this.gameObject.GetComponent<Rabbit>().Pathfind();
     }
 
 
@@ -347,7 +387,10 @@ public class Animal : MonoBehaviour
         }
     }
 
-    IEnumerator UpdatePath() // updates the path to ensure it always points towards the target location
+    /// <summary>
+    /// Updates the path to ensure it always points towards the correct target location
+    /// </summary>
+    IEnumerator UpdatePath()
     {
         if (Time.timeSinceLevelLoad < .3f)
         {
@@ -365,6 +408,7 @@ public class Animal : MonoBehaviour
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
                 targetPosOld = target;
                 this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+                this.gameObject.GetComponent<Rabbit>().FindNearestMate();
             }
 
         }
@@ -406,12 +450,15 @@ public class Animal : MonoBehaviour
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
             }
+            runOnce = true;
+
             if (followingPath == false)
             {
-                if (hungry == true)
+                if (isHungry && runOnce)
                 {
                     animator.SetBool("RabbitEat", true);
                     StartCoroutine(WaitBeforeEating());
+                    runOnce = false;
                 }
                 /********************************** Tell rabbit to Drink water
                 else if (thirsty == true)
@@ -427,6 +474,8 @@ public class Animal : MonoBehaviour
 
     IEnumerator WaitBeforeEating()
     {
+        runOnce = false;
+
         animator.SetBool("RabbitWalking", false);
         yield return new WaitForSeconds(3);
         animator.SetBool("RabbitWalking", false);

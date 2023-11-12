@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 7693490065689675732}
   m_Layer: 0
   m_Name: Fox
-  m_TagString: Untagged
+  m_TagString: Fox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -127,8 +127,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
-  thirst: 100
   libido: 100
   intSpeed: 50
+  turnDst: 5
+  turnSpeed: 3
+  stoppingDst: 10
   strength: 5
-  target: {fileID: 7419763933912794453, guid: 06566900368b1074d911e09f6bdd344e, type: 3}
+  dead: 0
+  target: {x: 0, y: 0, z: 0}
+  isFindingFood: 0
+  hungry: 0
+  isLookingForMate: 0
+  readyToMate: 0
+  nearestMate: {fileID: 0}
+  allPotentialMates: []
+  chance: 1
+  minInterval: 0
+  maxInterval: 0
+  boundSize: 240
+  height: 50
+  moving: 0
+  canWander: 0
+  animator: {fileID: 0}

@@ -29,35 +29,65 @@ public class Rabbit : Animal
         }
     }
 
-    [ContextMenu("R - Pathfind food")]
-    public override void LocateFood()
-    {
-        animator.SetBool("RabbitWalking", true);
-        animator.SetBool("RabbitEat", false);
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-    }
 
     [ContextMenu("R - Eat food")]
     public override void EatFood() //destroys/eats grass object
     {
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
-        if (nearestDistance < 3)
+        Debug.Log("destroying grass");
+        //Destroy(nearestGrass.transform.parent.gameObject);
+        nearestGrass.transform.parent.position = new Vector3(nearestGrass.transform.parent.position.x, 200, nearestGrass.transform.parent.position.z);
+        Debug.Log("grass destroyed");
+
+        this.gameObject.GetComponent<Animal>().health = 100;
+
+        isFindingFood = false;
+        isHungry = false;
+
+        animator.SetBool("RabbitEat", false);
+        animator.SetBool("RabbitWalking", false);
+    }
+    #endregion
+
+    #region Mate methods
+
+    [ContextMenu("R - Locate nearest mate")]
+    public override void FindNearestMate()
+    {
+        nearestMate = null;
+        allPotentialMates = null;
+
+        allPotentialMates = GameObject.FindGameObjectsWithTag("Rabbit").ToList(); // adds all animals to list
+        for (int i = 0; i < allPotentialMates.Count; i++)
         {
-            isFindingFood = false;
-            hungry = false;
+            if (!allPotentialMates[i].gameObject.GetComponent<Animal>().readyToMate || allPotentialMates[i].gameObject.GetComponent<Animal>().isLookingForMate)
+            {
+                allPotentialMates.RemoveAt(i); // removes the animal from the list of mates if they are not also ready to mate or are currently looking for one
+                i--;
+            }
+        }
 
-            Debug.Log("destroying grass");
-            //Destroy(nearestGrass.transform.parent.gameObject);
-            nearestGrass.transform.parent.position = new Vector3(nearestGrass.transform.parent.position.x, 200, nearestGrass.transform.parent.position.z);
-            Debug.Log("grass destroyed");
+        if (allPotentialMates.Count == 0)
+        {
+            return;
+        }
 
-            this.gameObject.GetComponent<Animal>().health = 100;
+        distance = 0;
+        nearestDistance = 10000;
 
-            animator.SetBool("RabbitEat", false);
-            animator.SetBool("RabbitWalking", false);
+        for (int i = 0; i < allPotentialMates.Count; i++)
+        {
+            distance = Vector3.Distance(this.transform.position, allPotentialMates[i].transform.position);
+
+            if (distance < nearestDistance)
+            {
+                nearestMate = allPotentialMates[i];
+                nearestDistance = distance;
+            }
         }
     }
+
     #endregion
 
     #region Water methods
@@ -119,12 +149,20 @@ public class Rabbit : Animal
 
     #region Other methods
 
+    [ContextMenu("R - Begin pathfinding")]
+    public override void Pathfind()
+    {
+        animator.SetBool("RabbitWalking", true);
+        animator.SetBool("RabbitEat", false);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+    }
+
     public override void Die()
     {
         Debug.Log("dead");
 
         // stop animal from pathfinding
-        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        isHungry = false; isFindingFood = true; moving = true;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
@@ -141,7 +179,7 @@ public class Rabbit : Animal
         Debug.Log("dead");
 
         // stop animal from pathfinding
-        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        isHungry = false; isFindingFood = true; moving = true;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
