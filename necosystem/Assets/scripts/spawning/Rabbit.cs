@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Rabbit : Animal
 {
     #region Food methods
     [ContextMenu("R - Locate nearest food")]
-    public void GetClosestFood() //locates the nearest grass item
+    public void GetClosestFood() // locates the nearest grass item
     {
         nearestGrass = null;
         allGrass = null;
@@ -29,23 +30,18 @@ public class Rabbit : Animal
         }
     }
 
-    [ContextMenu("R - Pathfind food")]
-    public override void LocateFood()
-    {
-        animator.SetBool("RabbitWalking", true);
-        animator.SetBool("RabbitEat", false);
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-    }
-
     [ContextMenu("R - Eat food")]
     public override void EatFood() //destroys/eats grass object
     {
+        Debug.Log("EatFood");
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
-        if (nearestDistance < 3)
+        if (nearestDistance < 5)
         {
+            Debug.Log("NearestDistance < 5");
+
             isFindingFood = false;
-            hungry = false;
+            isHungry = false;
 
             Debug.Log("destroying grass");
             //Destroy(nearestGrass.transform.parent.gameObject);
@@ -58,6 +54,67 @@ public class Rabbit : Animal
             animator.SetBool("RabbitWalking", false);
         }
     }
+    #endregion
+
+    #region Mate methods
+
+    [ContextMenu("R - Locate nearest mate")]
+    public override void FindNearestMate()
+    {
+        nearestMate = null;
+        allPotentialMates = null;
+
+        // creates a list of all animals who meet the mate conditions
+        allPotentialMates = GameObject.FindGameObjectsWithTag("Rabbit").ToList(); // adds all animals to list
+        for (int i = 0; i < allPotentialMates.Count; i++)
+        {
+            if (!allPotentialMates[i].gameObject.GetComponent<Animal>().mateConditionsMet)
+            {
+                allPotentialMates.RemoveAt(i); // removes the animal from the list of mates if they do not meet the mate conditions
+                i--;
+            }
+            else if (allPotentialMates[i].gameObject == this.gameObject)
+            {
+                allPotentialMates.RemoveAt(i); // removes itself from the list of mates
+                i--;
+            }
+        }
+
+        if (allPotentialMates.Count == 0)
+        {
+            Debug.Log("No mate found");
+            return;
+        }
+
+        // iterates through the list to locate the closest animal
+        distance = 0;
+        nearestDistance = 10000;
+
+        for (int i = 0; i < allPotentialMates.Count; i++)
+        {
+            distance = Vector3.Distance(this.transform.position, allPotentialMates[i].transform.position);
+
+            if (distance < nearestDistance)
+            {
+                Debug.Log("Mate found");
+                nearestMate = allPotentialMates[i];
+                nearestDistance = distance;
+            }
+        }
+    }
+
+    public override void Mate()
+    {
+        Debug.Log("mating...");
+        libido = 100;
+
+        float chance = Random.Range(0f, 1f);
+        if (chance <= 0.5f)
+        {
+            //make baby -- also make it so walking animation stops and bool values reset afterwards
+        }
+    }
+
     #endregion
 
     #region Water methods
@@ -119,12 +176,65 @@ public class Rabbit : Animal
 
     #region Other methods
 
+    [ContextMenu("R - Pathfind food")]
+    public override void Pathfind()
+    {
+        animator.SetBool("RabbitWalking", true);
+        animator.SetBool("RabbitEat", false);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+    }
+
+    public override IEnumerator UpdatePath() // updates the path to ensure it always points towards the target location
+    {
+        Debug.Log("1");
+
+        if (Time.timeSinceLevelLoad < .3f)
+        {
+            yield return new WaitForSeconds(.3f);
+        }
+
+        Debug.Log("2");
+
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+
+        Debug.Log("3");
+
+        //float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
+        Vector3 targetPosOld = Vector3.zero;
+        while (true)
+        {
+            yield return new WaitForSeconds(minPathUpdateTime);
+            Debug.Log("4");
+
+            if (target != targetPosOld)
+            {
+                Debug.Log("5");
+
+                targetPosOld = target;
+                target = nearestMate.transform.position;
+
+                PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+
+                Debug.Log("6");
+
+                dstFromMate = Vector3.Distance(target, targetPosOld);
+                if (dstFromMate < 1)
+                {
+                    Mate();
+                    StopCoroutine("FollowPath");
+                    StopCoroutine("UpdatePath");
+                }
+            }
+        }
+    }
+
+
     public override void Die()
     {
         Debug.Log("dead");
 
         // stop animal from pathfinding
-        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        isHungry = false; isFindingFood = true; moving = true; canWander = false;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
@@ -141,7 +251,7 @@ public class Rabbit : Animal
         Debug.Log("dead");
 
         // stop animal from pathfinding
-        hungry = false; isFindingFood = true; moving = true; canWander = false;
+        isHungry = false; isFindingFood = true; moving = true; canWander = false;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
@@ -150,7 +260,7 @@ public class Rabbit : Animal
 
         // die
         animator.SetBool("RabbitDie", true);
-        yield return new WaitForSeconds(5.9f);
+        yield return new WaitForSeconds(5.5f);
         Destroy(this.gameObject);
     }
 
