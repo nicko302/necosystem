@@ -32,6 +32,8 @@ public class ObjectNoise : MonoBehaviour
     public float minObjectScale = .7f;
     public float maxObjectScale = 1.3f;
 
+    private float timer;
+
 
     public int mapChunkSize
     {
@@ -117,6 +119,21 @@ public class ObjectNoise : MonoBehaviour
         {
             StartCoroutine(WaitSeconds());
         }
+    }
+
+    void Update()
+    {
+        /*
+        if (timer <= 0)
+        {
+            UpdateGrassList();
+            timer = 3;
+        }
+        else
+        {
+            timer -= Time.deltaTime;
+        }
+        */
     }
 
     IEnumerator WaitSeconds() // delay object generation to allow terrain to generate beforehand

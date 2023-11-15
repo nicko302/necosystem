@@ -44,8 +44,8 @@ public class Rabbit : Animal
             isHungry = false;
 
             Debug.Log("destroying grass");
-            //Destroy(nearestGrass.transform.parent.gameObject);
-            nearestGrass.transform.parent.position = new Vector3(nearestGrass.transform.parent.position.x, 200, nearestGrass.transform.parent.position.z);
+            Destroy(nearestGrass.transform.parent.gameObject);
+            //nearestGrass.transform.parent.position = new Vector3(nearestGrass.transform.parent.position.x, 200, nearestGrass.transform.parent.position.z);
             Debug.Log("grass destroyed");
 
             this.gameObject.GetComponent<Animal>().health = 100;
@@ -118,6 +118,8 @@ public class Rabbit : Animal
         }
         animator.SetBool("RabbitWalking", false);
         runOnce = true;
+
+        allPotentialMates = null;
     }
 
     void SpawnRabbit()
@@ -129,8 +131,18 @@ public class Rabbit : Animal
         GameObject babyRabbit = Instantiate(babyPrefab, AnimalSpawner.transform); // instantiate new babyRabbit with the animal spawner object as a parent in hierarchy
         babyRabbit.transform.position = newPos;
 
+        StartCoroutine(DelayForBabyValues(babyRabbit));
+    }
+
+    private IEnumerator DelayForBabyValues(GameObject babyRabbit)
+    {
+        yield return new WaitForSeconds(0.5f);
         babyRabbit.transform.localScale = this.gameObject.transform.localScale * 0.2f; // make baby small
         babyRabbit.GetComponent<Rabbit>().isBaby = true; // allows baby to start growing in Animal Update() method
+        babyRabbit.GetComponent<Rabbit>().health = 100;
+        babyRabbit.GetComponent<Rabbit>().libido = 100;
+        babyRabbit.GetComponent<Rabbit>().age = 0;
+        babyRabbit.GetComponent<Rabbit>().ageCounter = 0;
     }
 
     #endregion

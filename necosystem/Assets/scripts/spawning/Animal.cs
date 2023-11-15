@@ -10,11 +10,6 @@ public class Animal : MonoBehaviour
     [Tooltip("The hunger and health of the animal")]
     [Range(0, 100)]
     public int health;
-    /*************************************** THIRST
-    [Tooltip("The desire for water")]
-    [Range(0, 100)]
-    public int thirst;
-    *///////////////////////////////////////
     [Tooltip("The desire for a mate")]
     [Range(0, 100)]
     public int libido;
@@ -23,7 +18,6 @@ public class Animal : MonoBehaviour
     [Tooltip("How fast the animal can travel")]
     [Range(30, 70)]
     public int intSpeed; // an easier value of speed to compare and alter
-
     public float turnDst = 5;
     public float turnSpeed = 3;
     public float stoppingDst = 10;
@@ -34,6 +28,11 @@ public class Animal : MonoBehaviour
     [Tooltip("How much damage the animal can do to others")]
     [Range(1, 9)]
     public int strength;
+    [Range(7, 11)]
+    public int lifespan;
+    [Range(0, 11)]
+    public int age;
+    public int ageCounter;
     public bool dead;
 
 
@@ -68,10 +67,6 @@ public class Animal : MonoBehaviour
     protected const int posOffset = 1;
     [SerializeField]
     protected GameObject babyPrefab;
-    /*************************************** water pathfinding variables
-    public bool isFindingWater = false;
-    public bool thirsty = false;
-    *///////////////////////////////////////
 
 
     [Header("Wander variables")]
@@ -106,12 +101,16 @@ public class Animal : MonoBehaviour
     [ContextMenu("Set Default Values")] // method to assign default values for debugging
     public void SetDefaults()
     {
-        health = 100;
-        //thirst = 100;
-        libido = 100;
+        health = UnityEngine.Random.Range(80, 100);
+        libido = UnityEngine.Random.Range(80, 100);
+        lifespan = UnityEngine.Random.Range(7, 11);
+        age = UnityEngine.Random.Range(3, 5);
+        ageCounter = UnityEngine.Random.Range(0, 3);
+
         strength = UnityEngine.Random.Range(1, 10);
         intSpeed = UnityEngine.Random.Range(30, 60);
     }
+
 
 
     #region Animal functions
@@ -180,7 +179,6 @@ public class Animal : MonoBehaviour
             CheckHunger();
             CheckLibido();
             CheckDeath();
-            //CheckThirst();
             animator.SetBool("RabbitEat", false);
 
             // checks every frame to see if the timer has reached zero
@@ -188,9 +186,22 @@ public class Animal : MonoBehaviour
             {
                 if (timer <= 0)
                 {
-                    health -= UnityEngine.Random.Range(3, 5);
-                    libido -= UnityEngine.Random.Range(2, 3);
-                    //thirst -= UnityEngine.Random.Range(2, 4);
+                    health -= UnityEngine.Random.Range(4, 7);
+                    if (!isBaby)
+                        libido -= UnityEngine.Random.Range(5, 9);
+                    else
+                        libido = 100;
+
+                    if (ageCounter < 4)
+                    {
+                        ageCounter += 1;
+                    }
+                    else
+                    {
+                        ageCounter = 0;
+                        age += 1;
+                    }
+
 
                     if (!moving)
                     {
@@ -209,9 +220,9 @@ public class Animal : MonoBehaviour
                     if (isBaby)
                     {
                         // when timer reaches zero, and until the baby has reached full size, its scale will increase
-                        if (transform.localScale.x < 0.63) // CHANGE TO MAKE IT THE DEFAULT RABBIT SIZE
-                        {// CHANGE TO MAKE IT THE DEFAULT RABBIT SIZE
-                            transform.localScale += new Vector3(.05f, .05f, .05f);
+                        if (transform.localScale.x < 0.63)
+                        {
+                            transform.localScale += new Vector3(.09f, .09f, .09f);
                         }
                         else
                         {
@@ -219,7 +230,8 @@ public class Animal : MonoBehaviour
                         }
                     }
 
-                    timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
+                    //timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
+                    timer = 6;
                 }
                 else
                 {
@@ -234,6 +246,10 @@ public class Animal : MonoBehaviour
             StartFoodPathfinding();
             isHungry = false;
             isFindingFood = true;
+        }
+        else if (isHungry && isFindingFood && nearestGrass == null)
+        {
+            StartFoodPathfinding(); // finds a new grass if current one has been eaten
         }
 
         if (readyToMate && !mateFound && !isHungry && !isFindingFood)
@@ -255,6 +271,15 @@ public class Animal : MonoBehaviour
                 readyToMate = false;
                 mateFound = true;
             }
+        }
+
+        if (age > 2)
+        {
+            isBaby = false;
+        }
+        if (age == lifespan)
+        {
+            Die();
         }
 
         /************************************* start water pathfinding
@@ -392,7 +417,15 @@ public class Animal : MonoBehaviour
     {
         //StartCoroutine(UpdatePath());
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-        target = nearestGrass.transform.position;
+        try
+        {
+            target = nearestGrass.transform.position;
+        }
+        catch
+        {
+            this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+            target = nearestGrass.transform.position;
+        }
         Debug.Log("Finding food");
 
         animator.SetBool("RabbitWalking", true);
@@ -408,7 +441,16 @@ public class Animal : MonoBehaviour
 
     private void StartMatePathfinding() //calls the required subroutines to pathfind towards a mate
     {
-        target = nearestMate.transform.position;
+        try
+        {
+            target = nearestMate.transform.position;
+        }
+        catch
+        {
+            allPotentialMates = null;
+            this.gameObject.GetComponent<Rabbit>().FindNearestMate();
+            target = nearestMate.transform.position;
+        }
         Debug.Log("Finding mate");
 
         animator.SetBool("RabbitWalking", true);
