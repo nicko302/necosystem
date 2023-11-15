@@ -49,6 +49,7 @@ public class Animal : MonoBehaviour
     [SerializeField]
     protected float nearestDistance = 10000;
 
+    [Header("Eating variables")]
     [SerializeField]
     protected GameObject[] allGrass;
     [SerializeField]
@@ -56,12 +57,17 @@ public class Animal : MonoBehaviour
     public bool isFindingFood = false;
     public bool isHungry = false;
 
+    [Header("Mating variables")]
+    public bool isBaby = false;
     public bool mateFound = false;
     public bool readyToMate = false;
     public bool mateConditionsMet = false;
     public GameObject nearestMate;
     public List<GameObject> allPotentialMates;
     public float dstFromMate;
+    protected const int posOffset = 1;
+    [SerializeField]
+    protected GameObject babyPrefab;
     /*************************************** water pathfinding variables
     public bool isFindingWater = false;
     public bool thirsty = false;
@@ -69,10 +75,10 @@ public class Animal : MonoBehaviour
 
 
     [Header("Wander variables")]
-    protected int randNum = 0;
     [SerializeField]
     [Tooltip("X / 10,000 chance to wander")]
     protected int chance = 1;
+    protected int randNum = 0;
     [SerializeField]
     protected float minInterval;
     [SerializeField]
@@ -91,6 +97,9 @@ public class Animal : MonoBehaviour
 
     [Header("Animator")]
     public Animator animator;
+
+    [Header("Other")]
+    public bool runOnce = true;
 
     Grid grid;
 
@@ -196,6 +205,20 @@ public class Animal : MonoBehaviour
                     {
                         StopRandomMovement();
                     }
+
+                    if (isBaby)
+                    {
+                        // when timer reaches zero, and until the baby has reached full size, its scale will increase
+                        if (transform.localScale.x < 0.63) // CHANGE TO MAKE IT THE DEFAULT RABBIT SIZE
+                        {// CHANGE TO MAKE IT THE DEFAULT RABBIT SIZE
+                            transform.localScale += new Vector3(.05f, .05f, .05f);
+                        }
+                        else
+                        {
+                            isBaby = false;
+                        }
+                    }
+
                     timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
                 }
                 else
@@ -492,20 +515,28 @@ public class Animal : MonoBehaviour
             }
             if (followingPath == false)
             {
-                if (isHungry == true)
+                if (isHungry)
                 {
                     animator.SetBool("RabbitEat", true);
                     StartCoroutine(WaitBeforeEating());
                 }
-                /********************************** Tell rabbit to Drink water
-                else if (thirsty == true)
+                else if (mateFound)
                 {
-                    animator.SetBool("RabbitEat", true);
-                    StartCoroutine(WaitBeforeDrinking());
+                    if (runOnce)
+                    Debug.Log("#Close to mate");
+                    StartCoroutine(WaitBeforeMating());
+                    StopCoroutine("FollowPath");
                 }
-                *//////////////////////////////////
+
+            /********************************** Tell rabbit to Drink water
+            else if (thirsty == true)
+            {
+                animator.SetBool("RabbitEat", true);
+                StartCoroutine(WaitBeforeDrinking());
             }
-            yield return null;
+            *//////////////////////////////////
+        }
+        yield return null;
         }
     }
 
@@ -516,6 +547,14 @@ public class Animal : MonoBehaviour
         yield return new WaitForSeconds(3);
         animator.SetBool("RabbitWalking", false);
         this.gameObject.GetComponent<Rabbit>().EatFood();
+    }
+
+    protected IEnumerator WaitBeforeMating()
+    {
+        Debug.Log("WaitBeforeMating");
+        animator.SetBool("RabbitWalking", true);
+        yield return new WaitForSeconds(3);
+        this.gameObject.GetComponent<Rabbit>().Mate();
     }
 
     /**********************

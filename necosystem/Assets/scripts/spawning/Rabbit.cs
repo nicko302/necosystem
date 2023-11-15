@@ -105,14 +105,32 @@ public class Rabbit : Animal
 
     public override void Mate()
     {
+        StopCoroutine("FollowPath");
+
         Debug.Log("mating...");
         libido = 100;
+        mateFound = false;
 
         float chance = Random.Range(0f, 1f);
         if (chance <= 0.5f)
         {
-            //make baby -- also make it so walking animation stops and bool values reset afterwards
+            SpawnRabbit();
         }
+        animator.SetBool("RabbitWalking", false);
+        runOnce = true;
+    }
+
+    void SpawnRabbit()
+    {
+        Vector3 rabbitPos = gameObject.transform.position;
+        Vector3 newPos = rabbitPos + (Vector3.one * posOffset);
+
+        GameObject AnimalSpawner = GameObject.Find("Animal Spawner");
+        GameObject babyRabbit = Instantiate(babyPrefab, AnimalSpawner.transform); // instantiate new babyRabbit with the animal spawner object as a parent in hierarchy
+        babyRabbit.transform.position = newPos;
+
+        babyRabbit.transform.localScale = this.gameObject.transform.localScale * 0.2f; // make baby small
+        babyRabbit.GetComponent<Rabbit>().isBaby = true; // allows baby to start growing in Animal Update() method
     }
 
     #endregion
@@ -220,7 +238,6 @@ public class Rabbit : Animal
                 dstFromMate = Vector3.Distance(target, targetPosOld);
                 if (dstFromMate < 1)
                 {
-                    Mate();
                     StopCoroutine("FollowPath");
                     StopCoroutine("UpdatePath");
                 }

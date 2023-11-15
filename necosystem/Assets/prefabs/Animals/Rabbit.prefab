@@ -776,16 +776,22 @@ MonoBehaviour:
   strength: 5
   dead: 0
   target: {x: 0, y: 0, z: 0}
+  exceptionCaught: 0
   distance: 0
   nearestDistance: 10000
   allGrass: []
+  nearestGrass: {fileID: 0}
   isFindingFood: 0
   isHungry: 0
-  isLookingForMate: 0
+  isBaby: 0
+  mateFound: 0
   readyToMate: 0
-  nearestMate: {fileID: 0}
+  mateConditionsMet: 0
+  nearestMate: {fileID: 7151781954798594762}
   allPotentialMates: []
-  chance: 2000
+  dstFromMate: 0
+  babyPrefab: {fileID: 7151781954798594762}
+  chance: 3000
   minInterval: 1
   maxInterval: 6
   boundSize: 240
@@ -793,6 +799,7 @@ MonoBehaviour:
   moving: 0
   canWander: 0
   animator: {fileID: 0}
+  runOnce: 1
 --- !u!114 &5171119864095032166
 MonoBehaviour:
   m_ObjectHideFlags: 0
