@@ -8,23 +8,23 @@ public class Rabbit : Animal
 {
     #region Food methods
     [ContextMenu("R - Locate nearest food")]
-    public void GetClosestFood() // locates the nearest grass item
+    public override void GetClosestFood() // locates the nearest grass item
     {
-        nearestGrass = null;
-        allGrass = null;
+        nearestFoodItem = null;
+        allFoodItems = null;
 
-        allGrass = GameObject.FindGameObjectsWithTag("Grass");
+        allFoodItems = GameObject.FindGameObjectsWithTag("Grass");
 
         distance = 0;
         nearestDistance = 10000;
 
-        for (int i = 0; i < allGrass.Length; i++)
+        for (int i = 0; i < allFoodItems.Length; i++)
         {
-            distance = Vector3.Distance(this.transform.position, allGrass[i].transform.position);
+            distance = Vector3.Distance(this.transform.position, allFoodItems[i].transform.position);
 
             if (distance < nearestDistance)
             {
-                nearestGrass = allGrass[i];
+                nearestFoodItem = allFoodItems[i];
                 nearestDistance = distance;
             }
         }
@@ -44,14 +44,14 @@ public class Rabbit : Animal
             isHungry = false;
 
             Debug.Log("destroying grass");
-            Destroy(nearestGrass.transform.parent.gameObject);
-            //nearestGrass.transform.parent.position = new Vector3(nearestGrass.transform.parent.position.x, 200, nearestGrass.transform.parent.position.z);
+            Destroy(nearestFoodItem.transform.parent.gameObject);
+            //nearestFoodItem.transform.parent.position = new Vector3(nearestFoodItem.transform.parent.position.x, 200, nearestFoodItem.transform.parent.position.z);
             Debug.Log("grass destroyed");
 
             this.gameObject.GetComponent<Animal>().health = 100;
 
-            animator.SetBool("RabbitEat", false);
-            animator.SetBool("RabbitWalking", false);
+            animator.SetBool("Eat", false);
+            animator.SetBool("Walking", false);
         }
     }
     #endregion
@@ -116,7 +116,7 @@ public class Rabbit : Animal
         {
             SpawnRabbit();
         }
-        animator.SetBool("RabbitWalking", false);
+        animator.SetBool("Walking", false);
         runOnce = true;
 
         allPotentialMates = null;
@@ -131,18 +131,29 @@ public class Rabbit : Animal
         GameObject babyRabbit = Instantiate(babyPrefab, AnimalSpawner.transform); // instantiate new babyRabbit with the animal spawner object as a parent in hierarchy
         babyRabbit.transform.position = newPos;
 
-        StartCoroutine(DelayForBabyValues(babyRabbit));
+        animator.SetBool("Walking", false);
+
+        if (babyRabbit != null)
+            StartCoroutine(DelayForBabyValues(babyRabbit));
     }
 
     private IEnumerator DelayForBabyValues(GameObject babyRabbit)
     {
-        yield return new WaitForSeconds(0.5f);
-        babyRabbit.transform.localScale = this.gameObject.transform.localScale * 0.2f; // make baby small
-        babyRabbit.GetComponent<Rabbit>().isBaby = true; // allows baby to start growing in Animal Update() method
-        babyRabbit.GetComponent<Rabbit>().health = 100;
-        babyRabbit.GetComponent<Rabbit>().libido = 100;
-        babyRabbit.GetComponent<Rabbit>().age = 0;
-        babyRabbit.GetComponent<Rabbit>().ageCounter = 0;
+        yield return new WaitForSeconds(0.1f);
+
+        try
+        {
+            babyRabbit.transform.localScale = Vector3.one * 0.126f; // make baby small
+            babyRabbit.GetComponent<Rabbit>().isBaby = true; // allows baby to start growing in Animal Update() method
+            babyRabbit.GetComponent<Rabbit>().health = 100;
+            babyRabbit.GetComponent<Rabbit>().libido = 100;
+            babyRabbit.GetComponent<Rabbit>().age = 0;
+            babyRabbit.GetComponent<Rabbit>().ageCounter = 0;
+        }
+        catch
+        {
+           //do nothing;
+        }
     }
 
     #endregion
@@ -154,21 +165,21 @@ public class Rabbit : Animal
     {
         //////////// CALCULATE NEAREST NODE BELOW Y = 2.5
 
-        nearestGrass = null;
-        allGrass = null;
+        nearestFoodItem = null;
+        allFoodItems = null;
 
-        allGrass = GameObject.FindGameObjectsWithTag("Grass");
+        allFoodItems = GameObject.FindGameObjectsWithTag("Grass");
 
         distance = 0;
         nearestDistance = 10000;
 
-        for (int i = 0; i < allGrass.Length; i++)
+        for (int i = 0; i < allFoodItems.Length; i++)
         {
-            distance = Vector3.Distance(this.transform.position, allGrass[i].transform.position);
+            distance = Vector3.Distance(this.transform.position, allFoodItems[i].transform.position);
 
             if (distance < nearestDistance)
             {
-                nearestGrass = allGrass[i];
+                nearestFoodItem = allFoodItems[i];
                 nearestDistance = distance;
             }
         }
@@ -177,8 +188,8 @@ public class Rabbit : Animal
     [ContextMenu("R - Pathfind food")]
     public override void LocateWater()
     {
-        animator.SetBool("RabbitWalking", true);
-        animator.SetBool("RabbitEat", false);
+        animator.SetBool("Walking", true);
+        animator.SetBool("Eat", false);
         PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
@@ -197,67 +208,14 @@ public class Rabbit : Animal
 
             this.gameObject.GetComponent<AnimalAttributes>().thirst = 100;
 
-            animator.SetBool("RabbitEat", false);
-            animator.SetBool("RabbitWalking", false);
+            animator.SetBool("Eat", false);
+            animator.SetBool("Walking", false);
         }
     }
     *////////////////////////////////////////
     #endregion
 
-    #region Other methods
-
-    [ContextMenu("R - Pathfind food")]
-    public override void Pathfind()
-    {
-        animator.SetBool("RabbitWalking", true);
-        animator.SetBool("RabbitEat", false);
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-    }
-
-    public override IEnumerator UpdatePath() // updates the path to ensure it always points towards the target location
-    {
-        Debug.Log("1");
-
-        if (Time.timeSinceLevelLoad < .3f)
-        {
-            yield return new WaitForSeconds(.3f);
-        }
-
-        Debug.Log("2");
-
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-
-        Debug.Log("3");
-
-        //float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
-        Vector3 targetPosOld = Vector3.zero;
-        while (true)
-        {
-            yield return new WaitForSeconds(minPathUpdateTime);
-            Debug.Log("4");
-
-            if (target != targetPosOld)
-            {
-                Debug.Log("5");
-
-                targetPosOld = target;
-                target = nearestMate.transform.position;
-
-                PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-
-                Debug.Log("6");
-
-                dstFromMate = Vector3.Distance(target, targetPosOld);
-                if (dstFromMate < 1)
-                {
-                    StopCoroutine("FollowPath");
-                    StopCoroutine("UpdatePath");
-                }
-            }
-        }
-    }
-
-
+    #region Animal functions
     public override void Die()
     {
         Debug.Log("dead");
@@ -267,11 +225,11 @@ public class Rabbit : Animal
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
-        animator.SetBool("RabbitWalking", false);
-        animator.SetBool("RabbitEat", false);
+        animator.SetBool("Walking", false);
+        animator.SetBool("Eat", false);
 
         // die
-        animator.SetBool("RabbitDie", true);
+        animator.SetBool("Die", true);
 
         StartCoroutine("DestroyDelay");
     }
@@ -284,14 +242,58 @@ public class Rabbit : Animal
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
-        animator.SetBool("RabbitWalking", false);
-        animator.SetBool("RabbitEat", false);
+        animator.SetBool("Walking", false);
+        animator.SetBool("Eat", false);
 
         // die
-        animator.SetBool("RabbitDie", true);
+        animator.SetBool("Die", true);
         yield return new WaitForSeconds(5.5f);
         Destroy(this.gameObject);
     }
 
+    #endregion
+
+    #region Pathfinding methods
+
+    [ContextMenu("R - Pathfind food")]
+    public override void Pathfind()
+    {
+        animator.SetBool("Walking", true);
+        animator.SetBool("Eat", false);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+    }
+
+    public override IEnumerator UpdatePath() // updates the path to ensure it always points towards the target location
+    {
+        if (Time.timeSinceLevelLoad < .3f)
+        {
+            yield return new WaitForSeconds(.3f);
+        }
+
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+
+        //float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
+        Vector3 targetPosOld = Vector3.zero;
+        while (true)
+        {
+            yield return new WaitForSeconds(minPathUpdateTime);
+            if (target != targetPosOld)
+            {
+
+                targetPosOld = target;
+                target = nearestMate.transform.position;
+
+                PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+
+
+                dstFromMate = Vector3.Distance(target, targetPosOld);
+                if (dstFromMate < 1)
+                {
+                    StopCoroutine("FollowPath");
+                    StopCoroutine("UpdatePath");
+                }
+            }
+        }
+    }
     #endregion
 }

@@ -84,10 +84,10 @@ public class Grid : MonoBehaviour
                 
                 if (Physics.Raycast(ray, out hit, 100)) // shoots ray down & outputs hit information
                 {
-                    worldPoint = new Vector3(worldPoint.x, hit.point.y, worldPoint.z); // sets the Y position of the node to the Y hit point of the ray
+                    worldPoint = new Vector3(worldPoint.x, hit.point.y +.2f, worldPoint.z); // sets the Y position of the node to the Y hit point of the ray
                                                                                        // (i.e. maps the node's position to the height of the terrain)
                 }
-                walkable = !(Physics.CheckSphere(worldPoint, nodeRadius, unwalkableMask));
+                walkable = !(Physics.CheckSphere(worldPoint, 1.5f, unwalkableMask));
 
                 if (worldPoint.y > 12)
                 {

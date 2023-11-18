@@ -728,8 +728,6 @@ GameObject:
   - component: {fileID: 5171119864095032166}
   - component: {fileID: 6737985620155815280}
   - component: {fileID: 331982134594621176}
-  - component: {fileID: 5144293012286350959}
-  - component: {fileID: 4437987791847875149}
   - component: {fileID: 6611408649077464873}
   m_Layer: 0
   m_Name: Rabbit
@@ -774,15 +772,18 @@ MonoBehaviour:
   turnSpeed: 3
   stoppingDst: 10
   strength: 5
+  lifespan: 0
+  age: 0
+  ageCounter: 0
   dead: 0
   target: {x: 0, y: 0, z: 0}
   exceptionCaught: 0
   distance: 0
   nearestDistance: 10000
-  allGrass: []
-  nearestGrass: {fileID: 0}
   isFindingFood: 0
   isHungry: 0
+  allFoodItems: []
+  nearestFoodItem: {fileID: 0}
   isBaby: 0
   mateFound: 0
   readyToMate: 0
@@ -791,14 +792,14 @@ MonoBehaviour:
   allPotentialMates: []
   dstFromMate: 0
   babyPrefab: {fileID: 7151781954798594762}
-  chance: 3000
-  minInterval: 1
-  maxInterval: 6
+  chance: 3500
+  minInterval: 5
+  maxInterval: 7
   boundSize: 240
   height: 50
   moving: 0
   canWander: 0
-  animator: {fileID: 0}
+  animator: {fileID: 6611408649077464873}
   runOnce: 1
 --- !u!114 &5171119864095032166
 MonoBehaviour:
@@ -843,48 +844,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 2.001763, z: 1.8630497}
   m_Center: {x: 0, y: 0.962791, z: 0.021992033}
---- !u!114 &5144293012286350959
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7151781954798594762}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5525dd27063b424478592e71ac41cf2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  movementSpeed: 7
-  rotationSpeed: 100
-  objCheckDiameter: 10
-  isWandering: 0
-  isHungry: 0
-  isWalking: 0
-  unwalkableMask:
-    serializedVersion: 2
-    m_Bits: 256
-  seaMask:
-    serializedVersion: 2
-    m_Bits: 512
-  terrainChunkMask:
-    serializedVersion: 2
-    m_Bits: 0
-  posForSeaRaycast: {fileID: 0}
---- !u!136 &4437987791847875149
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7151781954798594762}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  m_Radius: 0.928352
-  m_Height: 2.0317893
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.9457417, z: -0.061858647}
 --- !u!95 &6611408649077464873
 Animator:
   serializedVersion: 5

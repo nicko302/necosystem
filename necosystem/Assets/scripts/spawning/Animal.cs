@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Animal : MonoBehaviour
 {
+    #region Variables
     [Header("Needs")]
     [Tooltip("The hunger and health of the animal")]
     [Range(0, 100)]
@@ -49,12 +50,13 @@ public class Animal : MonoBehaviour
     protected float nearestDistance = 10000;
 
     [Header("Eating variables")]
-    [SerializeField]
-    protected GameObject[] allGrass;
-    [SerializeField]
-    protected GameObject nearestGrass;
     public bool isFindingFood = false;
     public bool isHungry = false;
+    [SerializeField]
+    protected GameObject[] allFoodItems;
+    [SerializeField]
+    protected GameObject nearestFoodItem;
+    protected bool beingHunted;
 
     [Header("Mating variables")]
     public bool isBaby = false;
@@ -64,7 +66,7 @@ public class Animal : MonoBehaviour
     public GameObject nearestMate;
     public List<GameObject> allPotentialMates;
     public float dstFromMate;
-    protected const int posOffset = 1;
+    protected const float posOffset = 2f;
     [SerializeField]
     protected GameObject babyPrefab;
 
@@ -86,7 +88,6 @@ public class Animal : MonoBehaviour
     protected float height = 50f;
     public bool moving = false;
 
-    private Rabbit rabbit;
     public bool canWander = false;
     Path path;
 
@@ -97,28 +98,25 @@ public class Animal : MonoBehaviour
     public bool runOnce = true;
 
     Grid grid;
+    #endregion
+
+    #region Animal functions
 
     [ContextMenu("Set Default Values")] // method to assign default values for debugging
     public void SetDefaults()
     {
         health = UnityEngine.Random.Range(80, 100);
         libido = UnityEngine.Random.Range(80, 100);
-        lifespan = UnityEngine.Random.Range(7, 11);
-        age = UnityEngine.Random.Range(3, 5);
+        if (GetComponent<Rabbit>() != null) { lifespan = UnityEngine.Random.Range(7, 11); }
+        else if (GetComponent<Fox>() != null) { lifespan = UnityEngine.Random.Range(4, 6); }
+        
+        age = UnityEngine.Random.Range(1, 2);
         ageCounter = UnityEngine.Random.Range(0, 3);
 
         strength = UnityEngine.Random.Range(1, 10);
-        intSpeed = UnityEngine.Random.Range(30, 60);
-    }
 
-
-
-    #region Animal functions
-
-    public virtual void Pathfind() //default find food method to be overwritten
-    {
-        Debug.Log("Finding food");
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+        if (GetComponent<Rabbit>() != null) { intSpeed = UnityEngine.Random.Range(30, 60); }
+        else if (GetComponent<Fox>() != null) { intSpeed = UnityEngine.Random.Range(40, 70); }
     }
 
     public virtual void EatFood() //default eat food method to be overwritten
@@ -131,6 +129,10 @@ public class Animal : MonoBehaviour
         }
     }
 
+    public virtual void Mate()
+    {
+        Debug.Log("mating...");
+    }
     public virtual void Die()
     {
         Debug.Log("dead");
@@ -145,33 +147,41 @@ public class Animal : MonoBehaviour
 
         StartCoroutine("DestroyDelay");
     }
+
     public virtual IEnumerator DestroyDelay()
     {
         yield return new WaitForSeconds(3);
         Destroy(this.gameObject);
     }
 
-    /************************ drink water
-
-    public virtual void LocateWater() //default find water method to be overwritten
+    IEnumerator WaitBeforeEating()
     {
-        Debug.Log("Finding water");
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+        Debug.Log("WaitBeforeEating");
+        animator.SetBool("Walking", false);
+        yield return new WaitForSeconds(3);
+        animator.SetBool("Walking", false);
+        EatFood();
     }
 
-    public virtual void DrinkWater() //default drink water method to be overwritten
+    protected IEnumerator WaitBeforeMating()
     {
-        this.gameObject.GetComponent<AnimalAttributes>().thirst += 20;
-
-        if (this.gameObject.GetComponent<AnimalAttributes>().thirst > 100) //keep within 0-100
-        {
-            this.gameObject.GetComponent<AnimalAttributes>().thirst -= (this.gameObject.GetComponent<AnimalAttributes>().thirst - 100);
-        }
+        Debug.Log("WaitBeforeMating");
+        animator.SetBool("Walking", true);
+        yield return new WaitForSeconds(3);
+        Mate();
     }
-    */////////////////////////
+
     #endregion
 
     #region Start/Update methods
+    private void Start()
+    {
+        StartCoroutine("DelayForWanderAI");
+
+        minInterval = 1;
+        maxInterval = 6;
+    }
+
     private void Update()
     {
         if (!(isHungry || mateFound)) // if the animal does not currently have a strong need
@@ -179,7 +189,6 @@ public class Animal : MonoBehaviour
             CheckHunger();
             CheckLibido();
             CheckDeath();
-            animator.SetBool("RabbitEat", false);
 
             // checks every frame to see if the timer has reached zero
             if (canWander)
@@ -222,7 +231,7 @@ public class Animal : MonoBehaviour
                         // when timer reaches zero, and until the baby has reached full size, its scale will increase
                         if (transform.localScale.x < 0.63)
                         {
-                            transform.localScale += new Vector3(.09f, .09f, .09f);
+                            transform.localScale += new Vector3(.04f, .04f, .04f);
                         }
                         else
                         {
@@ -230,8 +239,7 @@ public class Animal : MonoBehaviour
                         }
                     }
 
-                    //timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
-                    timer = 6;
+                    timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer
                 }
                 else
                 {
@@ -247,7 +255,7 @@ public class Animal : MonoBehaviour
             isHungry = false;
             isFindingFood = true;
         }
-        else if (isHungry && isFindingFood && nearestGrass == null)
+        else if (isHungry && isFindingFood && nearestFoodItem == null)
         {
             StartFoodPathfinding(); // finds a new grass if current one has been eaten
         }
@@ -273,23 +281,37 @@ public class Animal : MonoBehaviour
             }
         }
 
-        if (age > 2)
+        if (GetComponent<Rabbit>() != null)
         {
-            isBaby = false;
+            if (age > 2)
+            {
+                isBaby = false;
+            }
         }
+        else if (GetComponent<Fox>() != null)
+        {
+            if (age > 1)
+            {
+                isBaby = false;
+            }
+        }
+
+        if (beingHunted)
+        {
+            intSpeed += 10;
+            StopCoroutine("FollowPath");
+            RandomMovement();
+        }
+
         if (age == lifespan)
         {
             Die();
         }
 
-        /************************************* start water pathfinding
-        else if (thirsty && !isFindingWater)
-        {
-            StartWaterPathfinding();
-            thirsty = false;
-            isFindingWater = true;
-        }
-        */////////////////////////////////////
+        if (moving)
+            animator.SetBool("Walking", true);
+        else
+            animator.SetBool("Walking", false);
 
         if (dead)
         {
@@ -297,46 +319,9 @@ public class Animal : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        rabbit = this.GetComponent<Rabbit>();
-        animator = this.GetComponent<Animator>();
-
-        StartCoroutine("DelayForWanderAI");
-
-        minInterval = 1;
-        maxInterval = 6;
-    }
     #endregion
 
-    #region Pathfinding
-
-    IEnumerator DelayForWanderAI()
-    {
-        yield return new WaitForSeconds(4);
-        canWander = true;
-    }
-
-    [ContextMenu("Random Movement")]
-    void RandomMovement()
-    {
-        Debug.Log("starting wander");
-        target = new Vector3(UnityEngine.Random.Range(-boundSize, boundSize), height, UnityEngine.Random.Range(-boundSize, boundSize));
-        rabbit.Pathfind();
-
-        moving = true;
-    }
-
-    void StopRandomMovement()
-    {
-        Debug.Log("stopping wander");
-        StopCoroutine("FollowPath");
-        animator.SetBool("RabbitWalking", false);
-        animator.SetBool("RabbitEat", false);
-
-        moving = false;
-    }
-
+    #region Check needs functions
     private void CheckHunger() //checks if the health value meets the isHungry threshold
     {
         if (this.gameObject.GetComponent<Animal>().health <= 50 && this.gameObject.GetComponent<Animal>().health > 15)
@@ -362,6 +347,42 @@ public class Animal : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Wander functions
+
+    IEnumerator DelayForWanderAI()
+    {
+        yield return new WaitForSeconds(4);
+        canWander = true;
+    }
+
+    [ContextMenu("Random Movement")]
+    void RandomMovement()
+    {
+        Debug.Log("starting wander");
+        target = new Vector3(UnityEngine.Random.Range(-boundSize, boundSize), height, UnityEngine.Random.Range(-boundSize, boundSize));
+        Pathfind();
+    }
+
+    void StopRandomMovement()
+    {
+        Debug.Log("stopping wander");
+        StopCoroutine("FollowPath");
+        animator.SetBool("Walking", false);
+        animator.SetBool("Eat", false);
+
+        moving = false;
+    }
+
+    #endregion
+
+    #region Initial pathfinding methods
+    public virtual void Pathfind() //default find food method to be overwritten
+    {
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+    }
+
     public virtual void FindNearestMate()
     {
         nearestMate = null;
@@ -382,7 +403,7 @@ public class Animal : MonoBehaviour
 
         for (int i = 0; i < allPotentialMates.Count; i++)
         {
-            distance = Vector3.Distance(this.transform.position, allGrass[i].transform.position);
+            distance = Vector3.Distance(this.transform.position, allFoodItems[i].transform.position);
 
             if (distance < nearestDistance)
             {
@@ -392,51 +413,47 @@ public class Animal : MonoBehaviour
         }
     }
 
-    /************************* CheckThirst & StartWaterPathfinding
-    private void CheckThirst() //checks if the thirst value meets the thirsty threshold
+    public virtual void GetClosestFood()
     {
-        if (this.gameObject.GetComponent<AnimalAttributes>().thirst <= 50)
-        {
-            Debug.Log("thirsty");
-            thirsty = true;
-        }
-    }
 
-    private void StartWaterPathfinding() //calls the required subroutines to pathfind towards water
-    {
-        StartCoroutine(UpdatePath());
-        this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-        target = nearestGrass.transform.position;
-        Debug.Log("Finding food");f
-        this.gameObject.GetComponent<Rabbit>().Pathfind();
     }
-
-    *//////////////////////////
 
     private void StartFoodPathfinding() //calls the required subroutines to pathfind towards food
     {
         //StartCoroutine(UpdatePath());
-        this.gameObject.GetComponent<Rabbit>().GetClosestFood();
+        GetClosestFood();
+        bool doReturn = false;
         try
         {
-            target = nearestGrass.transform.position;
+            target = nearestFoodItem.transform.position;
         }
         catch
         {
-            this.gameObject.GetComponent<Rabbit>().GetClosestFood();
-            target = nearestGrass.transform.position;
+            try
+            {
+                GetClosestFood();
+                target = nearestFoodItem.transform.position;
+            }
+            catch
+            {
+                doReturn = true;
+            }
+        }
+        if (doReturn)
+        {
+            return;
         }
         Debug.Log("Finding food");
 
-        animator.SetBool("RabbitWalking", true);
+        animator.SetBool("Walking", true);
 
         Debug.Log("-1");
 
-        animator.SetBool("RabbitEat", false);
+        animator.SetBool("Eat", false);
 
         Debug.Log("0");
 
-        this.gameObject.GetComponent<Rabbit>().Pathfind();
+        Pathfind();
     }
 
     private void StartMatePathfinding() //calls the required subroutines to pathfind towards a mate
@@ -448,23 +465,22 @@ public class Animal : MonoBehaviour
         catch
         {
             allPotentialMates = null;
-            this.gameObject.GetComponent<Rabbit>().FindNearestMate();
+            FindNearestMate();
             target = nearestMate.transform.position;
         }
         Debug.Log("Finding mate");
 
-        animator.SetBool("RabbitWalking", true);
-        animator.SetBool("RabbitEat", false);
+        animator.SetBool("Walking", true);
+        animator.SetBool("Eat", false);
 
         StartCoroutine("UpdatePath");
 
         //this.gameObject.GetComponent<Rabbit>().Pathfind();
     }
 
-    public virtual void Mate()
-    {
-        Debug.Log("mating...");
-    }
+    #endregion
+
+    #region Pathfinding methods
 
     public void OnPathFound(Vector3[] waypoints, bool pathSuccessful)
     {
@@ -504,9 +520,9 @@ public class Animal : MonoBehaviour
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
                 targetPosOld = target;
                 if (isFindingFood)
-                    gameObject.GetComponent<Rabbit>().GetClosestFood();
+                    GetClosestFood();
                 if (mateFound)
-                    gameObject.GetComponent<Rabbit>().FindNearestMate();
+                    FindNearestMate();
 
                 Debug.Log("5");
             }
@@ -515,6 +531,8 @@ public class Animal : MonoBehaviour
 
     IEnumerator FollowPath()
     {
+        moving = true;
+
         bool followingPath = true;
         int pathIndex = 0;
         try
@@ -531,23 +549,39 @@ public class Animal : MonoBehaviour
         while (true)
         {
             Vector2 pos2D = new Vector2(transform.position.x, transform.position.z);
-            while (path.turnBoundaries[pathIndex].HasCrossedLine(pos2D))
-                if (pathIndex == path.finishLineIndex)
-                {
-                    followingPath = false;
-                    break;
-                }
-                else
-                    pathIndex++;
+            try
+            {
+                while (path.turnBoundaries[pathIndex].HasCrossedLine(pos2D))
+                    if (pathIndex == path.finishLineIndex)
+                    {
+                        followingPath = false;
+                        break;
+                    }
+                    else
+                        pathIndex++;
+            }
+            catch
+            {
+                followingPath = false;
+                StopCoroutine("FollowPath");
+            }
 
             if (followingPath)
             {
                 if (pathIndex >= path.slowDownIndex && stoppingDst > 0)
                 {
-                    speedPercent = Mathf.Clamp01(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(pos2D) / stoppingDst);
-                    if (speedPercent < 0.05f)
+                    try
+                    {
+                        speedPercent = Mathf.Clamp01(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(pos2D) / stoppingDst);
+                        if (speedPercent < 0.05f)
+                        {
+                            followingPath = false;
+                        }
+                    }
+                    catch
                     {
                         followingPath = false;
+                        StopCoroutine("FollowPath");
                     }
                 }
 
@@ -559,7 +593,7 @@ public class Animal : MonoBehaviour
             {
                 if (isHungry)
                 {
-                    animator.SetBool("RabbitEat", true);
+                    animator.SetBool("Eat", true);
                     StartCoroutine(WaitBeforeEating());
                 }
                 else if (mateFound)
@@ -569,45 +603,12 @@ public class Animal : MonoBehaviour
                     StartCoroutine(WaitBeforeMating());
                     StopCoroutine("FollowPath");
                 }
-
-            /********************************** Tell rabbit to Drink water
-            else if (thirsty == true)
-            {
-                animator.SetBool("RabbitEat", true);
-                StartCoroutine(WaitBeforeDrinking());
-            }
-            *//////////////////////////////////
         }
         yield return null;
         }
     }
 
-    IEnumerator WaitBeforeEating()
-    {
-        Debug.Log("WaitBeforeEating");
-        animator.SetBool("RabbitWalking", false);
-        yield return new WaitForSeconds(3);
-        animator.SetBool("RabbitWalking", false);
-        this.gameObject.GetComponent<Rabbit>().EatFood();
-    }
-
-    protected IEnumerator WaitBeforeMating()
-    {
-        Debug.Log("WaitBeforeMating");
-        animator.SetBool("RabbitWalking", true);
-        yield return new WaitForSeconds(3);
-        this.gameObject.GetComponent<Rabbit>().Mate();
-    }
-
-    /**********************
-    IEnumerator WaitBeforeDrinking()
-    {
-        animator.SetBool("RabbitWalking", false);
-        yield return new WaitForSeconds(3);
-        animator.SetBool("RabbitWalking", false);
-        this.gameObject.GetComponent<Rabbit>().DrinkWater();
-    }
-    *///////////////////////
+    #endregion
 
     public void OnDrawGizmos()
     {
@@ -616,5 +617,4 @@ public class Animal : MonoBehaviour
             path.DrawWithGizmos();
         }
     }
-    #endregion
 }

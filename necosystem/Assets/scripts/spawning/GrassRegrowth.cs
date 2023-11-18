@@ -58,10 +58,11 @@ public class GrassRegrowth : MonoBehaviour
         int minIndex = allGrass.IndexOf(allGrass.First());
         int posOffset = UnityEngine.Random.Range(2, 5);
         GameObject grassObject = allGrass[UnityEngine.Random.Range(minIndex, maxIndex)];
-        Vector3 grassTransform = grassObject.transform.position;
 
-        if (grassTransform != null)
+        if (grassObject != null)
         {
+            Vector3 grassTransform = grassObject.transform.position;
+
             Vector3 newPos = grassTransform + (Vector3.one * posOffset);
             grass.transform.position = newPos;
             Debug.Log("grass regrown at " + grass.transform.position);
