@@ -105,10 +105,10 @@ public class Animal : MonoBehaviour
     [ContextMenu("Set Default Values")] // method to assign default values for debugging
     public void SetDefaults()
     {
-        health = UnityEngine.Random.Range(80, 100);
-        libido = UnityEngine.Random.Range(80, 100);
+        health = UnityEngine.Random.Range(90, 100);
+        libido = UnityEngine.Random.Range(90, 100);
         if (GetComponent<Rabbit>() != null) { lifespan = UnityEngine.Random.Range(7, 11); }
-        else if (GetComponent<Fox>() != null) { lifespan = UnityEngine.Random.Range(4, 6); }
+        else if (GetComponent<Fox>() != null) { lifespan = UnityEngine.Random.Range(4, 7); }
         
         age = UnityEngine.Random.Range(1, 2);
         ageCounter = UnityEngine.Random.Range(0, 3);
@@ -165,8 +165,9 @@ public class Animal : MonoBehaviour
 
     protected IEnumerator WaitBeforeMating()
     {
+        runOnce = false;
         Debug.Log("WaitBeforeMating");
-        animator.SetBool("Walking", true);
+        animator.SetBool("Walking", false);
         yield return new WaitForSeconds(3);
         Mate();
     }
@@ -259,6 +260,7 @@ public class Animal : MonoBehaviour
         {
             StartFoodPathfinding(); // finds a new grass if current one has been eaten
         }
+        else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
 
         if (readyToMate && !mateFound && !isHungry && !isFindingFood)
         {
@@ -275,7 +277,6 @@ public class Animal : MonoBehaviour
             if (nearestMate != null) // only pathfinds to a potential mate if the mate is also ready to mate
             {
                 StartMatePathfinding();
-                moving = true;
                 readyToMate = false;
                 mateFound = true;
             }
@@ -367,12 +368,12 @@ public class Animal : MonoBehaviour
 
     void StopRandomMovement()
     {
+        moving = false;
+
         Debug.Log("stopping wander");
         StopCoroutine("FollowPath");
         animator.SetBool("Walking", false);
         animator.SetBool("Eat", false);
-
-        moving = false;
     }
 
     #endregion
@@ -458,16 +459,7 @@ public class Animal : MonoBehaviour
 
     private void StartMatePathfinding() //calls the required subroutines to pathfind towards a mate
     {
-        try
-        {
-            target = nearestMate.transform.position;
-        }
-        catch
-        {
-            allPotentialMates = null;
-            FindNearestMate();
-            target = nearestMate.transform.position;
-        }
+        moving = true;
         Debug.Log("Finding mate");
 
         animator.SetBool("Walking", true);
@@ -487,9 +479,20 @@ public class Animal : MonoBehaviour
         Debug.Log("Path found");
         if (pathSuccessful)
         {
-            path = new Path(waypoints, transform.position, turnDst, stoppingDst); ;
-            StopCoroutine("FollowPath");
-            StartCoroutine("FollowPath");
+            try
+            {
+                path = new Path(waypoints, transform.position, turnDst, stoppingDst); ;
+                StopCoroutine("FollowPath");
+                StartCoroutine("FollowPath");
+            }
+            catch
+            {
+                StopCoroutine(FollowPath());
+                moving = false;
+                mateFound = false;
+                readyToMate = true;
+                mateConditionsMet = true;
+            }
         }
     }
 
@@ -599,9 +602,11 @@ public class Animal : MonoBehaviour
                 else if (mateFound)
                 {
                     if (runOnce)
-                    Debug.Log("#Close to mate");
-                    StartCoroutine(WaitBeforeMating());
-                    StopCoroutine("FollowPath");
+                    {
+                        Debug.Log("#Close to mate");
+                        StartCoroutine(WaitBeforeMating());
+                        StopCoroutine("FollowPath");
+                    }
                 }
         }
         yield return null;

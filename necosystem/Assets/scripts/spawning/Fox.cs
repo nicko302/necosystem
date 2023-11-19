@@ -138,7 +138,7 @@ public class Fox : Animal
 
     private IEnumerator DelayForBabyValues(GameObject babyFox)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.3f);
 
         try
         {
@@ -148,6 +148,8 @@ public class Fox : Animal
             babyFox.GetComponent<Fox>().libido = 100;
             babyFox.GetComponent<Fox>().age = 0;
             babyFox.GetComponent<Fox>().ageCounter = 0;
+            babyFox.GetComponent<Fox>().isFindingFood = false;
+            babyFox.GetComponent<Fox>().isHungry = false;
         }
         catch
         {
@@ -163,7 +165,7 @@ public class Fox : Animal
         Debug.Log("dead");
 
         // stop animal from pathfinding
-        isHungry = false; isFindingFood = true; moving = true; canWander = false;
+        isHungry = false; isFindingFood = true; canWander = false;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
@@ -180,7 +182,7 @@ public class Fox : Animal
         Debug.Log("dead");
 
         // stop animal from pathfinding
-        isHungry = false; isFindingFood = true; moving = true; canWander = false;
+        isHungry = false; isFindingFood = true; canWander = false;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
@@ -189,7 +191,7 @@ public class Fox : Animal
 
         // die
         animator.SetBool("Die", true);
-        yield return new WaitForSeconds(5.5f);
+        yield return new WaitForSeconds(6f);
         Destroy(this.gameObject);
     }
 

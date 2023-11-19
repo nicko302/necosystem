@@ -815,7 +815,7 @@ MonoBehaviour:
   mateFound: 0
   readyToMate: 0
   mateConditionsMet: 0
-  nearestMate: {fileID: 7151781954798594762}
+  nearestMate: {fileID: 0}
   allPotentialMates: []
   dstFromMate: 0
   babyPrefab: {fileID: 7151781954798594762}
