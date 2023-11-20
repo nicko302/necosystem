@@ -261,9 +261,16 @@ public class Animal : MonoBehaviour
             StartFoodPathfinding(); // finds a new grass if current one has been eaten
         }
         else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
+        {
+            StopCoroutine(FollowPath());
+            nearestFoodItem = null;
+            GetClosestFood();
+            StartFoodPathfinding();
+        }
 
         if (readyToMate && !mateFound && !isHungry && !isFindingFood)
         {
+            Debug.Log("mate conditions met should be true now");
             mateConditionsMet = true;
         }
         else
@@ -281,6 +288,7 @@ public class Animal : MonoBehaviour
                 mateFound = true;
             }
         }
+        else if (mateFound && )
 
         if (GetComponent<Rabbit>() != null)
         {

@@ -112,7 +112,7 @@ public class Rabbit : Animal
         mateFound = false;
 
         float chance = Random.Range(0f, 1f);
-        if (chance <= 0.5f)
+        if (chance <= 0.6f)
         {
             SpawnRabbit();
         }
