@@ -256,14 +256,6 @@ public class Animal : MonoBehaviour
             isHungry = false;
             isFindingFood = true;
         }
-        else if (isHungry && isFindingFood && nearestFoodItem != null)
-        {
-            StopCoroutine(FollowPath());
-            nearestFoodItem = null;
-            StartFoodPathfinding();
-            isHungry = false;
-            isFindingFood = true;
-        }
         else if (isHungry && isFindingFood && nearestFoodItem == null)
         {
             StartFoodPathfinding(); // finds a new grass if current one has been eaten
@@ -396,7 +388,9 @@ public class Animal : MonoBehaviour
     #region Initial pathfinding methods
     public virtual void Pathfind() //default find food method to be overwritten
     {
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+        Debug.Log("AAAAAAAAAAAA");
+        UpdatePath();
+        //PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
     public virtual void FindNearestMate()
@@ -495,6 +489,7 @@ public class Animal : MonoBehaviour
         Debug.Log("Path found");
         if (pathSuccessful)
         {
+            Debug.Log("DDDDDDDDDDDDDDDDDDDDDD");
             try
             {
                 path = new Path(waypoints, transform.position, turnDst, stoppingDst); ;
@@ -550,6 +545,8 @@ public class Animal : MonoBehaviour
 
     IEnumerator FollowPath()
     {
+        Debug.Log("EEEEEEEEEEEEEEE");
+
         moving = true;
 
         bool followingPath = true;

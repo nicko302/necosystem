@@ -204,11 +204,14 @@ public class Fox : Animal
     {
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+        Debug.Log("BBBBBBBBBBBBBBBBBBBB");
+        StartCoroutine(UpdatePath());
+        //PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
     public override IEnumerator UpdatePath() // updates the path to ensure it always points towards the target location
     {
+        Debug.Log("CCCCCCCCCCCCCCCCCC");
         if (Time.timeSinceLevelLoad < .3f)
         {
             yield return new WaitForSeconds(.3f);
@@ -225,7 +228,15 @@ public class Fox : Animal
             {
 
                 targetPosOld = target;
-                target = nearestMate.transform.position;
+
+                if (mateFound)
+                {
+                    target = nearestMate.transform.position;
+                }
+                else if (isFindingFood)
+                {
+                    target = nearestFoodItem.transform.position;
+                }
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
