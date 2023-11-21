@@ -256,6 +256,14 @@ public class Animal : MonoBehaviour
             isHungry = false;
             isFindingFood = true;
         }
+        else if (isHungry && isFindingFood && nearestFoodItem != null)
+        {
+            StopCoroutine(FollowPath());
+            nearestFoodItem = null;
+            StartFoodPathfinding();
+            isHungry = false;
+            isFindingFood = true;
+        }
         else if (isHungry && isFindingFood && nearestFoodItem == null)
         {
             StartFoodPathfinding(); // finds a new grass if current one has been eaten
@@ -288,7 +296,6 @@ public class Animal : MonoBehaviour
                 mateFound = true;
             }
         }
-        else if (mateFound && )
 
         if (GetComponent<Rabbit>() != null)
         {
@@ -473,7 +480,8 @@ public class Animal : MonoBehaviour
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
 
-        StartCoroutine("UpdatePath");
+        Debug.Log("!!!!!!!!!!!");
+        StartCoroutine(UpdatePath());
 
         //this.gameObject.GetComponent<Rabbit>().Pathfind();
     }
