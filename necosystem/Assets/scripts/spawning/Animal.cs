@@ -60,13 +60,14 @@ public class Animal : MonoBehaviour
 
     [Header("Mating variables")]
     public bool isBaby = false;
+    private bool stoppedGrowing = false;
     public bool mateFound = false;
     public bool readyToMate = false;
     public bool mateConditionsMet = false;
     public GameObject nearestMate;
     public List<GameObject> allPotentialMates;
-    public float dstFromMate;
-    protected const float posOffset = 2f;
+    public float dstFromTarget;
+    protected const float posOffset = 3f;
     [SerializeField]
     protected GameObject babyPrefab;
 
@@ -227,7 +228,7 @@ public class Animal : MonoBehaviour
                         StopRandomMovement();
                     }
 
-                    if (isBaby)
+                    if (!stoppedGrowing)
                     {
                         // when timer reaches zero, and until the baby has reached full size, its scale will increase
                         if (transform.localScale.x < 0.63)
@@ -236,7 +237,7 @@ public class Animal : MonoBehaviour
                         }
                         else
                         {
-                            isBaby = false;
+                            stoppedGrowing = true;
                         }
                     }
 
@@ -260,17 +261,10 @@ public class Animal : MonoBehaviour
         {
             StartFoodPathfinding(); // finds a new grass if current one has been eaten
         }
-        else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
-        {
-            StopCoroutine(FollowPath());
-            nearestFoodItem = null;
-            GetClosestFood();
-            StartFoodPathfinding();
-        }
+        //else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
 
         if (readyToMate && !mateFound && !isHungry && !isFindingFood)
         {
-            Debug.Log("mate conditions met should be true now");
             mateConditionsMet = true;
         }
         else
@@ -388,9 +382,7 @@ public class Animal : MonoBehaviour
     #region Initial pathfinding methods
     public virtual void Pathfind() //default find food method to be overwritten
     {
-        Debug.Log("AAAAAAAAAAAA");
-        UpdatePath();
-        //PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
     public virtual void FindNearestMate()
@@ -474,8 +466,7 @@ public class Animal : MonoBehaviour
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
 
-        Debug.Log("!!!!!!!!!!!");
-        StartCoroutine(UpdatePath());
+        StartCoroutine("UpdatePath");
 
         //this.gameObject.GetComponent<Rabbit>().Pathfind();
     }
@@ -489,7 +480,6 @@ public class Animal : MonoBehaviour
         Debug.Log("Path found");
         if (pathSuccessful)
         {
-            Debug.Log("DDDDDDDDDDDDDDDDDDDDDD");
             try
             {
                 path = new Path(waypoints, transform.position, turnDst, stoppingDst); ;
@@ -545,8 +535,6 @@ public class Animal : MonoBehaviour
 
     IEnumerator FollowPath()
     {
-        Debug.Log("EEEEEEEEEEEEEEE");
-
         moving = true;
 
         bool followingPath = true;

@@ -111,7 +111,7 @@ public class Fox : Animal
         mateFound = false;
 
         float chance = Random.Range(0f, 1f);
-        if (chance <= 0.6f)
+        if (chance <= 0.5f)
         {
             SpawnFox();
         }
@@ -204,14 +204,11 @@ public class Fox : Animal
     {
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
-        Debug.Log("BBBBBBBBBBBBBBBBBBBB");
-        StartCoroutine(UpdatePath());
-        //PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
     public override IEnumerator UpdatePath() // updates the path to ensure it always points towards the target location
     {
-        Debug.Log("CCCCCCCCCCCCCCCCCC");
         if (Time.timeSinceLevelLoad < .3f)
         {
             yield return new WaitForSeconds(.3f);
@@ -229,20 +226,16 @@ public class Fox : Animal
 
                 targetPosOld = target;
 
-                if (isFindingFood)
-                {
-                    target = nearestFoodItem.transform.position;
-                }
-                else if (mateFound)
-                {
+                if (mateFound)
                     target = nearestMate.transform.position;
-                }
+                else if (isFindingFood)
+                    target = nearestFoodItem.transform.position;
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
-                dstFromMate = Vector3.Distance(target, targetPosOld);
-                if (dstFromMate < 1.5f)
+                dstFromTarget = Vector3.Distance(target, targetPosOld);
+                if (dstFromTarget < 1.5f)
                 {
                     StopCoroutine("FollowPath");
                     StopCoroutine("UpdatePath");
