@@ -202,7 +202,7 @@ public class Animal : MonoBehaviour
                     else
                         libido = 100;
 
-                    if (ageCounter < 4)
+                    if (ageCounter < 5)
                     {
                         ageCounter += 1;
                     }

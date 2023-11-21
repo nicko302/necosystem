@@ -111,7 +111,7 @@ public class Fox : Animal
         mateFound = false;
 
         float chance = Random.Range(0f, 1f);
-        if (chance <= 0.5f)
+        if (chance <= 0.6f)
         {
             SpawnFox();
         }
@@ -229,20 +229,20 @@ public class Fox : Animal
 
                 targetPosOld = target;
 
-                if (mateFound)
-                {
-                    target = nearestMate.transform.position;
-                }
-                else if (isFindingFood)
+                if (isFindingFood)
                 {
                     target = nearestFoodItem.transform.position;
+                }
+                else if (mateFound)
+                {
+                    target = nearestMate.transform.position;
                 }
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
                 dstFromMate = Vector3.Distance(target, targetPosOld);
-                if (dstFromMate < 1)
+                if (dstFromMate < 1.5f)
                 {
                     StopCoroutine("FollowPath");
                     StopCoroutine("UpdatePath");

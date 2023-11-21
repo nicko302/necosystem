@@ -149,6 +149,8 @@ public class Rabbit : Animal
             babyRabbit.GetComponent<Rabbit>().libido = 100;
             babyRabbit.GetComponent<Rabbit>().age = 0;
             babyRabbit.GetComponent<Rabbit>().ageCounter = 0;
+            babyRabbit.GetComponent<Rabbit>().isFindingFood = false;
+            babyRabbit.GetComponent<Rabbit>().isHungry = false;
         }
         catch
         {
