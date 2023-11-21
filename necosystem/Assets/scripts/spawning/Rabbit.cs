@@ -281,15 +281,18 @@ public class Rabbit : Animal
             yield return new WaitForSeconds(minPathUpdateTime);
             if (target != targetPosOld)
             {
-
                 targetPosOld = target;
-                target = nearestMate.transform.position;
+
+                if (mateFound)
+                    target = nearestMate.transform.position;
+                else if (isFindingFood)
+                    target = nearestFoodItem.transform.position;
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
-                dstFromMate = Vector3.Distance(target, targetPosOld);
-                if (dstFromMate < 1)
+                dstFromTarget = Vector3.Distance(target, targetPosOld);
+                if (dstFromTarget < 1)
                 {
                     StopCoroutine("FollowPath");
                     StopCoroutine("UpdatePath");

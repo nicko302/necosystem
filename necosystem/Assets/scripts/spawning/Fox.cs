@@ -111,7 +111,7 @@ public class Fox : Animal
         mateFound = false;
 
         float chance = Random.Range(0f, 1f);
-        if (chance <= 0.5f)
+        if (chance <= 0.6f)
         {
             SpawnFox();
         }
@@ -223,7 +223,6 @@ public class Fox : Animal
             yield return new WaitForSeconds(minPathUpdateTime);
             if (target != targetPosOld)
             {
-
                 targetPosOld = target;
 
                 if (mateFound)
