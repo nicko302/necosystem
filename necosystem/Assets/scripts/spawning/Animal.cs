@@ -56,7 +56,11 @@ public class Animal : MonoBehaviour
     protected GameObject[] allFoodItems;
     [SerializeField]
     protected GameObject nearestFoodItem;
+    [SerializeField]
     protected bool beingHunted;
+    [SerializeField]
+    protected bool huntedEscapeOnce;
+    protected float huntEscapeTimer;
 
     [Header("Mating variables")]
     public bool isBaby = false;
@@ -300,10 +304,21 @@ public class Animal : MonoBehaviour
 
         if (beingHunted)
         {
-            intSpeed += 10;
-            StopCoroutine("FollowPath");
-            RandomMovement();
+            canWander = false;
+            if (huntEscapeTimer <= 0)
+            {
+                Debug.Log("<<<<<<<<");
+                StopCoroutine(FollowPath());
+                RandomMovement();
+                huntEscapeTimer = 3; // reset the interval timer
+            }
+            else //if animal is currently moving and timer reached zero
+            {
+                huntEscapeTimer -= Time.deltaTime; // timer counts 
+            }
         }
+        else
+        { canWander = true; }
 
         if (age == lifespan)
         {
@@ -638,6 +653,12 @@ public class Animal : MonoBehaviour
         }
         yield return null;
         }
+    }
+
+    IEnumerator DelayForHuntEscape()
+    {
+        yield return new WaitForSeconds(0.5f);
+        huntedEscapeOnce = false;
     }
 
     #endregion

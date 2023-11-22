@@ -174,6 +174,7 @@ public class Fox : Animal
 
         // stop animal from pathfinding
         isHungry = false; isFindingFood = true; canWander = false;
+        gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations

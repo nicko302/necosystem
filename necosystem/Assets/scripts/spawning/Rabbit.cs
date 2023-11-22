@@ -229,6 +229,7 @@ public class Rabbit : Animal
         // stop animal from pathfinding
         isHungry = false; isFindingFood = true; moving = true; canWander = false;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
+        beingHunted = false;
 
         // stop current animations
         animator.SetBool("Walking", false);
