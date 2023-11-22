@@ -77,6 +77,10 @@ public class Fox : Animal
                 allPotentialMates.RemoveAt(i); // removes itself from the list of mates
                 i--;
             }
+            else if (allPotentialMates[i].gameObject.GetComponent<Animal>().age < allPotentialMates[i].gameObject.GetComponent<Animal>().lifespan - 1)
+            {
+                allPotentialMates.RemoveAt(i); // removes animal from the list of mates if age is close to death
+            }
         }
 
         if (allPotentialMates.Count == 0)
@@ -138,10 +142,14 @@ public class Fox : Animal
 
     private IEnumerator DelayForBabyValues(GameObject babyFox)
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.2f);
 
         try
         {
+            var rotation = babyFox.transform.rotation.eulerAngles;
+            rotation.x = 0;
+            transform.rotation = Quaternion.Euler(rotation); // make sure baby is standing upright
+
             babyFox.transform.localScale = Vector3.one * 0.126f; // make baby small
             babyFox.GetComponent<Fox>().isBaby = true; // allows baby to start growing in Animal Update() method
             babyFox.GetComponent<Fox>().health = 100;

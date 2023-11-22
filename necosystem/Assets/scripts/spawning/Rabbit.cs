@@ -139,10 +139,14 @@ public class Rabbit : Animal
 
     private IEnumerator DelayForBabyValues(GameObject babyRabbit)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.2f);
 
         try
         {
+            var rotation = babyRabbit.transform.rotation.eulerAngles;
+            rotation.x = 0;
+            transform.rotation = Quaternion.Euler(rotation); // make sure baby is standing upright
+
             babyRabbit.transform.localScale = Vector3.one * 0.126f; // make baby small
             babyRabbit.GetComponent<Rabbit>().isBaby = true; // allows baby to start growing in Animal Update() method
             babyRabbit.GetComponent<Rabbit>().health = 100;

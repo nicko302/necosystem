@@ -482,18 +482,44 @@ public class Animal : MonoBehaviour
         {
             try
             {
-                path = new Path(waypoints, transform.position, turnDst, stoppingDst); ;
+                Debug.Log("@ TRY statement");
+                path = new Path(waypoints, transform.position, turnDst, stoppingDst);
                 StopCoroutine("FollowPath");
                 StartCoroutine("FollowPath");
             }
             catch
             {
+                Debug.Log("@ CATCH statement");
                 StopCoroutine(FollowPath());
-                moving = false;
-                mateFound = false;
-                readyToMate = true;
-                mateConditionsMet = true;
+                if (mateFound)
+                {
+                    /*
+                    mateFound = false;
+                    readyToMate = true;
+                    mateConditionsMet = true;
+                    */
+                    FindNearestMate();
+                    path = new Path(waypoints, transform.position, turnDst, stoppingDst);
+                    StartCoroutine("FollowPath");
+                    Debug.Log("@C MATEFOUND");
+                }
+                else if (isFindingFood)
+                {
+                    /*
+                    isFindingFood = false;
+                    */
+                    GetClosestFood();
+                    path = new Path(waypoints, transform.position, turnDst, stoppingDst);
+                    StartCoroutine("FollowPath");
+                    Debug.Log("@C ISFINDINGFOOD");
+                }
             }
+        }
+        else
+        {
+            StopCoroutine(FollowPath());
+            moving = false;
+            mateFound = false;
         }
     }
 
