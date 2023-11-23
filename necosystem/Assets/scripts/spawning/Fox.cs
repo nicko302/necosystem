@@ -13,7 +13,7 @@ public class Fox : Animal
         nearestFoodItem = null;
         allFoodItems = null;
 
-        allFoodItems = GameObject.FindGameObjectsWithTag("Grass");
+        allFoodItems = GameObject.FindGameObjectsWithTag("Rabbit");
 
         distance = 0;
         nearestDistance = 10000;
@@ -26,6 +26,8 @@ public class Fox : Animal
             {
                 nearestFoodItem = allFoodItems[i];
                 nearestDistance = distance;
+                nearestFoodItem.gameObject.GetComponent<Rabbit>().beingHunted = true;
+                nearestFoodItem.gameObject.GetComponent<Rabbit>().canWander = false;
             }
         }
     }
@@ -35,22 +37,31 @@ public class Fox : Animal
     {
         Debug.Log("EatFood");
         this.gameObject.GetComponent<Fox>().GetClosestFood();
+        GameObject rabbit = nearestFoodItem.gameObject;
 
         if (nearestDistance < 5)
         {
+            rabbit.GetComponent<Rabbit>().beingHunted = false;
+            rabbit.GetComponent<Rabbit>().canWander = false;
+            rabbit.GetComponent<Rabbit>().StopAllCoroutines();
+
             Debug.Log("NearestDistance < 5");
 
             isFindingFood = false;
             isHungry = false;
 
-            Debug.Log("destroying fox");
-            Destroy(nearestFoodItem.transform.parent.gameObject);
-            Debug.Log("fox destroyed");
+            Debug.Log("destroying rabbit");
+            rabbit.GetComponent<Rabbit>().Die();
+            Debug.Log("rabbit destroyed");
 
             this.gameObject.GetComponent<Animal>().health = 100;
 
             animator.SetBool("Eat", false);
             animator.SetBool("Walking", false);
+        }
+        else if (nearestDistance > 10)
+        {
+            rabbit.GetComponent<Rabbit>().beingHunted = false;
         }
     }
     #endregion
@@ -208,7 +219,7 @@ public class Fox : Animal
 
     #region Pathfinding methods
 
-    [ContextMenu("R - Pathfind food")]
+    [ContextMenu("R - Pathfind")]
     public override void Pathfind()
     {
         animator.SetBool("Walking", true);

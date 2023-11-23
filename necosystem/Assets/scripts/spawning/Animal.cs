@@ -56,8 +56,7 @@ public class Animal : MonoBehaviour
     protected GameObject[] allFoodItems;
     [SerializeField]
     protected GameObject nearestFoodItem;
-    [SerializeField]
-    protected bool beingHunted;
+    public bool beingHunted;
     [SerializeField]
     protected bool huntedEscapeOnce;
     protected float huntEscapeTimer;
@@ -94,6 +93,7 @@ public class Animal : MonoBehaviour
     public bool moving = false;
 
     public bool canWander = false;
+    public bool afterSceneLoad = false;
     Path path;
 
     [Header("Animator")]
@@ -255,84 +255,87 @@ public class Animal : MonoBehaviour
             }
         }
 
-        if (isHungry && !isFindingFood)
+        if (afterSceneLoad)
         {
-            StartFoodPathfinding();
-            isHungry = false;
-            isFindingFood = true;
-        }
-        else if (isHungry && isFindingFood && nearestFoodItem == null)
-        {
-            StartFoodPathfinding(); // finds a new grass if current one has been eaten
-        }
-        //else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
-
-        if (readyToMate && !mateFound && !isHungry && !isFindingFood)
-        {
-            mateConditionsMet = true;
-        }
-        else
-        {
-            mateConditionsMet = false;
-        }
-
-        if (mateConditionsMet)
-        {
-            FindNearestMate(); // locate the nearest potential mate
-            if (nearestMate != null) // only pathfinds to a potential mate if the mate is also ready to mate
+            if (isHungry && !isFindingFood)
             {
-                StartMatePathfinding();
-                readyToMate = false;
-                mateFound = true;
+                StartFoodPathfinding();
+                isHungry = false;
+                isFindingFood = true;
             }
-        }
-
-        if (GetComponent<Rabbit>() != null)
-        {
-            if (age > 2)
+            else if (isHungry && isFindingFood && nearestFoodItem == null)
             {
-                isBaby = false;
+                StartFoodPathfinding(); // finds a new grass if current one has been eaten
             }
-        }
-        else if (GetComponent<Fox>() != null)
-        {
-            if (age > 1)
+            //else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
+
+            if (readyToMate && !mateFound && !isHungry && !isFindingFood)
             {
-                isBaby = false;
+                mateConditionsMet = true;
             }
-        }
-
-        if (beingHunted)
-        {
-            canWander = false;
-            if (huntEscapeTimer <= 0)
+            else
             {
-                Debug.Log("<<<<<<<<");
-                StopCoroutine(FollowPath());
-                RandomMovement();
-                huntEscapeTimer = 3; // reset the interval timer
+                mateConditionsMet = false;
             }
-            else //if animal is currently moving and timer reached zero
+
+            if (mateConditionsMet)
             {
-                huntEscapeTimer -= Time.deltaTime; // timer counts 
+                FindNearestMate(); // locate the nearest potential mate
+                if (nearestMate != null) // only pathfinds to a potential mate if the mate is also ready to mate
+                {
+                    StartMatePathfinding();
+                    readyToMate = false;
+                    mateFound = true;
+                }
             }
-        }
-        else
-        { canWander = true; }
 
-        if (age == lifespan)
-        {
-            Die();
-        }
+            if (GetComponent<Rabbit>() != null)
+            {
+                if (age > 2)
+                {
+                    isBaby = false;
+                }
+            }
+            else if (GetComponent<Fox>() != null)
+            {
+                if (age > 1)
+                {
+                    isBaby = false;
+                }
+            }
 
-        if (moving)
-            animator.SetBool("Walking", true);
-        else
-            animator.SetBool("Walking", false);
+            if (beingHunted)
+            {
+                canWander = false;
+                if (huntEscapeTimer <= 0)
+                {
+                    Debug.Log("<<<<<<<<");
+                    StopCoroutine(FollowPath());
+                    RandomMovement();
+                    huntEscapeTimer = 3; // reset the interval timer
+                }
+                else //if animal is currently moving and timer reached zero
+                {
+                    huntEscapeTimer -= Time.deltaTime; // timer counts 
+                }
+            }
+            else
+            { canWander = true; }
 
-        if (dead)
-        {
-            Die();
+            if (age == lifespan)
+            {
+                Die();
+            }
+
+            if (moving)
+                animator.SetBool("Walking", true);
+            else
+                animator.SetBool("Walking", false);
+
+            if (dead)
+            {
+                Die();
+            }
         }
     }
 
@@ -372,6 +375,7 @@ public class Animal : MonoBehaviour
     {
         yield return new WaitForSeconds(4);
         canWander = true;
+        afterSceneLoad = true;
     }
 
     [ContextMenu("Random Movement")]
