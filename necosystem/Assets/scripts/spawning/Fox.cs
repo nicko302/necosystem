@@ -13,12 +13,27 @@ public class Fox : Animal
         nearestFoodItem = null;
         allFoodItems = null;
 
-        allFoodItems = GameObject.FindGameObjectsWithTag("Rabbit");
+        // creates a list of all rabbits
+        allFoodItems = GameObject.FindGameObjectsWithTag("Rabbit").ToList(); // adds all rabbits to the list
+        for (int i = 0; i < allFoodItems.Count; i++)
+        {
+            if (allFoodItems[i].gameObject.GetComponent<Animal>().beingHunted)
+            {
+                allFoodItems.RemoveAt(i); // removes rabbit from the list if they are already being hunted
+                i--;
+            }
+        }
 
+        if (allFoodItems.Count == 0)
+        {
+            return;
+        }
+
+        // iterates through the list to locate the closest food item
         distance = 0;
         nearestDistance = 10000;
 
-        for (int i = 0; i < allFoodItems.Length; i++)
+        for (int i = 0; i < allFoodItems.Count; i++)
         {
             distance = Vector3.Distance(this.transform.position, allFoodItems[i].transform.position);
 
@@ -26,6 +41,7 @@ public class Fox : Animal
             {
                 nearestFoodItem = allFoodItems[i];
                 nearestDistance = distance;
+                nearestFoodItem.gameObject.GetComponent<Rabbit>().StopCoroutine("FollowPath");
                 nearestFoodItem.gameObject.GetComponent<Rabbit>().beingHunted = true;
                 nearestFoodItem.gameObject.GetComponent<Rabbit>().canWander = false;
             }
@@ -36,7 +52,6 @@ public class Fox : Animal
     public override void EatFood() //destroys/eats grass object
     {
         Debug.Log("EatFood");
-        this.gameObject.GetComponent<Fox>().GetClosestFood();
         GameObject rabbit = nearestFoodItem.gameObject;
 
         if (nearestDistance < 5)
@@ -64,6 +79,42 @@ public class Fox : Animal
             rabbit.GetComponent<Rabbit>().beingHunted = false;
         }
     }
+    
+    public override void StartFoodPathfinding()
+    {
+        {
+            GetClosestFood();
+            bool doReturn = false;
+            try
+            {
+                target = nearestFoodItem.transform.position;
+            }
+            catch
+            {
+                try
+                {
+                    GetClosestFood();
+                    target = nearestFoodItem.transform.position;
+                }
+                catch
+                {
+                    doReturn = true;
+                }
+            }
+            if (doReturn)
+            {
+                return;
+            }
+
+            nearestFoodItem.GetComponent<Animal>().beingHunted = true;
+
+            animator.SetBool("Walking", true);
+            animator.SetBool("Eat", false);
+
+            StartCoroutine(UpdatePath());
+        }
+    }
+
     #endregion
 
     #region Mate methods
@@ -253,10 +304,24 @@ public class Fox : Animal
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
-                dstFromTarget = Vector3.Distance(target, targetPosOld);
-                if (dstFromTarget < 1.5f)
+                dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target);
+                if (dstFromTarget < 2)
                 {
+                    if (mateFound)
+                    {
+                        WaitBeforeMating();
+                    }
+                    else if (isFindingFood)
+                    {
+                        nearestFoodItem.GetComponent<Animal>().beingHunted = false;
+                        nearestFoodItem.GetComponent<Animal>().canWander = false;
+                        nearestFoodItem.GetComponent<Animal>().StopAllCoroutines();
+                        WaitBeforeEating();
+                    }
+
                     StopCoroutine("FollowPath");
+
+                    Debug.Log("MET TARGET");
                     StopCoroutine("UpdatePath");
                 }
             }

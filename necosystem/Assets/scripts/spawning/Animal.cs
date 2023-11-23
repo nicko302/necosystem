@@ -39,6 +39,7 @@ public class Animal : MonoBehaviour
 
     [Header("Pathfinding variables")]
     public Vector3 target;
+    public float dstFromTarget;
 
     public bool exceptionCaught;
 
@@ -53,7 +54,7 @@ public class Animal : MonoBehaviour
     public bool isFindingFood = false;
     public bool isHungry = false;
     [SerializeField]
-    protected GameObject[] allFoodItems;
+    protected List<GameObject> allFoodItems;
     [SerializeField]
     protected GameObject nearestFoodItem;
     public bool beingHunted;
@@ -69,7 +70,6 @@ public class Animal : MonoBehaviour
     public bool mateConditionsMet = false;
     public GameObject nearestMate;
     public List<GameObject> allPotentialMates;
-    public float dstFromTarget;
     protected const float posOffset = 3f;
     [SerializeField]
     protected GameObject babyPrefab;
@@ -121,7 +121,7 @@ public class Animal : MonoBehaviour
         strength = UnityEngine.Random.Range(1, 10);
 
         if (GetComponent<Rabbit>() != null) { intSpeed = UnityEngine.Random.Range(30, 60); }
-        else if (GetComponent<Fox>() != null) { intSpeed = UnityEngine.Random.Range(40, 70); }
+        else if (GetComponent<Fox>() != null) { intSpeed = UnityEngine.Random.Range(50, 80); }
     }
 
     public virtual void EatFood() //default eat food method to be overwritten
@@ -159,7 +159,7 @@ public class Animal : MonoBehaviour
         Destroy(this.gameObject);
     }
 
-    IEnumerator WaitBeforeEating()
+    protected IEnumerator WaitBeforeEating()
     {
         Debug.Log("WaitBeforeEating");
         animator.SetBool("Walking", false);
@@ -201,7 +201,11 @@ public class Animal : MonoBehaviour
             {
                 if (timer <= 0)
                 {
-                    health -= UnityEngine.Random.Range(4, 7);
+                    if (this.gameObject.GetComponent<Fox>() != null)
+                        health -= UnityEngine.Random.Range(3, 4);
+                    else
+                        health -= UnityEngine.Random.Range(4, 8);
+
                     if (!isBaby)
                         libido -= UnityEngine.Random.Range(5, 9);
                     else
@@ -265,7 +269,7 @@ public class Animal : MonoBehaviour
             }
             else if (isHungry && isFindingFood && nearestFoodItem == null)
             {
-                StartFoodPathfinding(); // finds a new grass if current one has been eaten
+                StartFoodPathfinding(); // finds a new food if current one has been eaten
             }
             //else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
 
@@ -439,7 +443,7 @@ public class Animal : MonoBehaviour
 
     }
 
-    private void StartFoodPathfinding() //calls the required subroutines to pathfind towards food
+    public virtual void StartFoodPathfinding() //calls the required subroutines to pathfind towards food
     {
         //StartCoroutine(UpdatePath());
         GetClosestFood();

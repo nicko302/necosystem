@@ -13,12 +13,13 @@ public class Rabbit : Animal
         nearestFoodItem = null;
         allFoodItems = null;
 
-        allFoodItems = GameObject.FindGameObjectsWithTag("Grass");
+        allFoodItems = GameObject.FindGameObjectsWithTag("Grass").ToList();
 
+        // iterates through the list to locate the closest food item
         distance = 0;
         nearestDistance = 10000;
 
-        for (int i = 0; i < allFoodItems.Length; i++)
+        for (int i = 0; i < allFoodItems.Count; i++)
         {
             distance = Vector3.Distance(this.transform.position, allFoodItems[i].transform.position);
 
@@ -254,7 +255,7 @@ public class Rabbit : Animal
 
         // die
         animator.SetBool("Die", true);
-        yield return new WaitForSeconds(5.5f);
+        yield return new WaitForSeconds(5f);
         Destroy(this.gameObject);
     }
 
@@ -296,10 +297,16 @@ public class Rabbit : Animal
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
-                dstFromTarget = Vector3.Distance(target, targetPosOld);
-                if (dstFromTarget < 1)
+                dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target);
+                if (dstFromTarget < 2)
                 {
                     StopCoroutine("FollowPath");
+
+                    if (mateFound)
+                        Mate();
+                    else if (isFindingFood)
+                        EatFood();
+
                     StopCoroutine("UpdatePath");
                 }
             }
