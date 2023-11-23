@@ -9,11 +9,11 @@ public class AnimalSpawn : MonoBehaviour
 
     [Header("Fox")]
     public GameObject[] foxPrefabs;
-    public int foxSpawnDensity;
+    public int foxSpawnSparsity;
 
     [Header("Rabbit")]
     public GameObject[] rabbitPrefabs;
-    public int rabbitSpawnDensity;
+    public int rabbitSpawnSparsity;
 
     public int mapChunkSize
     {
@@ -29,10 +29,11 @@ public class AnimalSpawn : MonoBehaviour
         for (int y = -mapChunkSize; y < mapChunkSize; y++)
             for (int x = -mapChunkSize; x < mapChunkSize; x++) //for each x and y position
             {
-                if (Random.Range(1, foxSpawnDensity) == 1)
+                if (Random.Range(1, foxSpawnSparsity) == 1)
                 {
+                    GameObject foxesParent = GameObject.Find("Foxes");
                     GameObject foxPrefab = foxPrefabs[Random.Range(0, foxPrefabs.Length)];
-                    GameObject fox = Instantiate(foxPrefab, this.transform);
+                    GameObject fox = Instantiate(foxPrefab, foxesParent.transform);
                     fox.transform.position = new Vector3(x, 60, y);
                     fox.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                 }
@@ -43,10 +44,11 @@ public class AnimalSpawn : MonoBehaviour
         for (int y = -mapChunkSize; y < mapChunkSize; y++)
             for (int x = -mapChunkSize; x < mapChunkSize; x++) //for each x and y position
             {
-                if (Random.Range(1, rabbitSpawnDensity) == 1)
+                if (Random.Range(1, rabbitSpawnSparsity) == 1)
                 {
+                    GameObject rabbitsParent = GameObject.Find("Rabbits");
                     GameObject rabbitPrefab = rabbitPrefabs[Random.Range(0, rabbitPrefabs.Length)];
-                    GameObject rabbit = Instantiate(rabbitPrefab, this.transform);
+                    GameObject rabbit = Instantiate(rabbitPrefab, rabbitsParent.transform);
                     rabbit.transform.position = new Vector3(x, 60, y);
                     rabbit.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
                 }
@@ -68,6 +70,6 @@ public class AnimalSpawn : MonoBehaviour
     {
         yield return new WaitForSeconds(2);
         SpawnFox();
-        //SpawnRabbit();
+        SpawnRabbit();
     }
 }

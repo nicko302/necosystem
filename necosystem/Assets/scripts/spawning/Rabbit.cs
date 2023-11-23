@@ -139,16 +139,22 @@ public class Rabbit : Animal
 
     private IEnumerator DelayForBabyValues(GameObject babyRabbit)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.2f);
 
         try
         {
+            var rotation = babyRabbit.transform.rotation.eulerAngles;
+            rotation.x = 0;
+            transform.rotation = Quaternion.Euler(rotation); // make sure baby is standing upright
+
             babyRabbit.transform.localScale = Vector3.one * 0.126f; // make baby small
             babyRabbit.GetComponent<Rabbit>().isBaby = true; // allows baby to start growing in Animal Update() method
             babyRabbit.GetComponent<Rabbit>().health = 100;
             babyRabbit.GetComponent<Rabbit>().libido = 100;
             babyRabbit.GetComponent<Rabbit>().age = 0;
             babyRabbit.GetComponent<Rabbit>().ageCounter = 0;
+            babyRabbit.GetComponent<Rabbit>().isFindingFood = false;
+            babyRabbit.GetComponent<Rabbit>().isHungry = false;
         }
         catch
         {
@@ -223,6 +229,7 @@ public class Rabbit : Animal
         // stop animal from pathfinding
         isHungry = false; isFindingFood = true; moving = true; canWander = false;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
+        beingHunted = false;
 
         // stop current animations
         animator.SetBool("Walking", false);
@@ -279,15 +286,18 @@ public class Rabbit : Animal
             yield return new WaitForSeconds(minPathUpdateTime);
             if (target != targetPosOld)
             {
-
                 targetPosOld = target;
-                target = nearestMate.transform.position;
+
+                if (mateFound)
+                    target = nearestMate.transform.position;
+                else if (isFindingFood)
+                    target = nearestFoodItem.transform.position;
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
-                dstFromMate = Vector3.Distance(target, targetPosOld);
-                if (dstFromMate < 1)
+                dstFromTarget = Vector3.Distance(target, targetPosOld);
+                if (dstFromTarget < 1)
                 {
                     StopCoroutine("FollowPath");
                     StopCoroutine("UpdatePath");

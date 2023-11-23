@@ -13,7 +13,7 @@ public class Fox : Animal
         nearestFoodItem = null;
         allFoodItems = null;
 
-        allFoodItems = GameObject.FindGameObjectsWithTag("Grass");
+        allFoodItems = GameObject.FindGameObjectsWithTag("Rabbit");
 
         distance = 0;
         nearestDistance = 10000;
@@ -26,6 +26,8 @@ public class Fox : Animal
             {
                 nearestFoodItem = allFoodItems[i];
                 nearestDistance = distance;
+                nearestFoodItem.gameObject.GetComponent<Rabbit>().beingHunted = true;
+                nearestFoodItem.gameObject.GetComponent<Rabbit>().canWander = false;
             }
         }
     }
@@ -35,22 +37,31 @@ public class Fox : Animal
     {
         Debug.Log("EatFood");
         this.gameObject.GetComponent<Fox>().GetClosestFood();
+        GameObject rabbit = nearestFoodItem.gameObject;
 
         if (nearestDistance < 5)
         {
+            rabbit.GetComponent<Rabbit>().beingHunted = false;
+            rabbit.GetComponent<Rabbit>().canWander = false;
+            rabbit.GetComponent<Rabbit>().StopAllCoroutines();
+
             Debug.Log("NearestDistance < 5");
 
             isFindingFood = false;
             isHungry = false;
 
-            Debug.Log("destroying fox");
-            Destroy(nearestFoodItem.transform.parent.gameObject);
-            Debug.Log("fox destroyed");
+            Debug.Log("destroying rabbit");
+            rabbit.GetComponent<Rabbit>().Die();
+            Debug.Log("rabbit destroyed");
 
             this.gameObject.GetComponent<Animal>().health = 100;
 
             animator.SetBool("Eat", false);
             animator.SetBool("Walking", false);
+        }
+        else if (nearestDistance > 10)
+        {
+            rabbit.GetComponent<Rabbit>().beingHunted = false;
         }
     }
     #endregion
@@ -76,6 +87,10 @@ public class Fox : Animal
             {
                 allPotentialMates.RemoveAt(i); // removes itself from the list of mates
                 i--;
+            }
+            else if (allPotentialMates[i].gameObject.GetComponent<Animal>().age < allPotentialMates[i].gameObject.GetComponent<Animal>().lifespan - 1)
+            {
+                allPotentialMates.RemoveAt(i); // removes animal from the list of mates if age is close to death
             }
         }
 
@@ -111,7 +126,7 @@ public class Fox : Animal
         mateFound = false;
 
         float chance = Random.Range(0f, 1f);
-        if (chance <= 0.5f)
+        if (chance <= 0.6f)
         {
             SpawnFox();
         }
@@ -138,10 +153,14 @@ public class Fox : Animal
 
     private IEnumerator DelayForBabyValues(GameObject babyFox)
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.2f);
 
         try
         {
+            var rotation = babyFox.transform.rotation.eulerAngles;
+            rotation.x = 0;
+            transform.rotation = Quaternion.Euler(rotation); // make sure baby is standing upright
+
             babyFox.transform.localScale = Vector3.one * 0.126f; // make baby small
             babyFox.GetComponent<Fox>().isBaby = true; // allows baby to start growing in Animal Update() method
             babyFox.GetComponent<Fox>().health = 100;
@@ -166,6 +185,7 @@ public class Fox : Animal
 
         // stop animal from pathfinding
         isHungry = false; isFindingFood = true; canWander = false;
+        gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
         StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
 
         // stop current animations
@@ -199,19 +219,16 @@ public class Fox : Animal
 
     #region Pathfinding methods
 
-    [ContextMenu("R - Pathfind food")]
+    [ContextMenu("R - Pathfind")]
     public override void Pathfind()
     {
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
-        Debug.Log("BBBBBBBBBBBBBBBBBBBB");
-        StartCoroutine(UpdatePath());
-        //PathRequestManager.RequestPath(transform.position, target, OnPathFound);
+        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
     }
 
     public override IEnumerator UpdatePath() // updates the path to ensure it always points towards the target location
     {
-        Debug.Log("CCCCCCCCCCCCCCCCCC");
         if (Time.timeSinceLevelLoad < .3f)
         {
             yield return new WaitForSeconds(.3f);
@@ -226,23 +243,18 @@ public class Fox : Animal
             yield return new WaitForSeconds(minPathUpdateTime);
             if (target != targetPosOld)
             {
-
                 targetPosOld = target;
 
                 if (mateFound)
-                {
                     target = nearestMate.transform.position;
-                }
                 else if (isFindingFood)
-                {
                     target = nearestFoodItem.transform.position;
-                }
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
-                dstFromMate = Vector3.Distance(target, targetPosOld);
-                if (dstFromMate < 1)
+                dstFromTarget = Vector3.Distance(target, targetPosOld);
+                if (dstFromTarget < 1.5f)
                 {
                     StopCoroutine("FollowPath");
                     StopCoroutine("UpdatePath");
