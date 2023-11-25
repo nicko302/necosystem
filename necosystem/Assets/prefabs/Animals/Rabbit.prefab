@@ -725,7 +725,9 @@ GameObject:
   m_Component:
   - component: {fileID: 7497344833718186096}
   - component: {fileID: 5695235105919813511}
+  - component: {fileID: 1048134933466711590}
   - component: {fileID: 5171119864095032166}
+  - component: {fileID: -8724374812625609310}
   - component: {fileID: 6737985620155815280}
   - component: {fileID: 331982134594621176}
   - component: {fileID: 6611408649077464873}
@@ -777,6 +779,7 @@ MonoBehaviour:
   ageCounter: 0
   dead: 0
   target: {x: 0, y: 0, z: 0}
+  dstFromTarget: 0
   exceptionCaught: 0
   distance: 0
   nearestDistance: 10000
@@ -784,13 +787,15 @@ MonoBehaviour:
   isHungry: 0
   allFoodItems: []
   nearestFoodItem: {fileID: 0}
+  beingHunted: 0
+  huntedEscapeOnce: 0
+  huntEscapeTimer: 0
   isBaby: 0
   mateFound: 0
   readyToMate: 0
   mateConditionsMet: 0
   nearestMate: {fileID: 0}
   allPotentialMates: []
-  dstFromMate: 0
   babyPrefab: {fileID: 7151781954798594762}
   chance: 3500
   minInterval: 5
@@ -799,8 +804,25 @@ MonoBehaviour:
   height: 50
   moving: 0
   canWander: 0
+  afterSceneLoad: 0
   animator: {fileID: 6611408649077464873}
   runOnce: 1
+  valueBar: {fileID: 0}
+  outline: {fileID: 0}
+--- !u!114 &1048134933466711590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7151781954798594762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a14719f38021e484d84c954769e9720c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selected: 0
+  inList: 0
 --- !u!114 &5171119864095032166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -815,6 +837,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animalAttributes: {fileID: 5695235105919813511}
   obj: {fileID: 7151781954798594762}
+--- !u!114 &-8724374812625609310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7151781954798594762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 6
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!54 &6737985620155815280
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -60,6 +60,7 @@ public class Animal : MonoBehaviour
     public bool beingHunted;
     [SerializeField]
     protected bool huntedEscapeOnce;
+    [SerializeField]
     protected float huntEscapeTimer;
 
     [Header("Mating variables")]
@@ -101,6 +102,8 @@ public class Animal : MonoBehaviour
 
     [Header("Other")]
     public bool runOnce = true;
+    public ValueBar valueBar;
+    public Outline outline;
 
     Grid grid;
     #endregion
@@ -188,6 +191,12 @@ public class Animal : MonoBehaviour
         maxInterval = 6;
     }
 
+    private void Awake()
+    {
+        outline = gameObject.GetComponent<Outline>();
+        outline.enabled = false;
+    }
+
     private void Update()
     {
         if (!(isHungry || mateFound)) // if the animal does not currently have a strong need
@@ -261,19 +270,50 @@ public class Animal : MonoBehaviour
 
         if (afterSceneLoad)
         {
-            if (isHungry && !isFindingFood)
+            if (isHungry && !isFindingFood && !beingHunted)
             {
                 StartFoodPathfinding();
                 isHungry = false;
                 isFindingFood = true;
             }
-            else if (isHungry && isFindingFood && nearestFoodItem == null)
+            else if (isHungry && isFindingFood && nearestFoodItem == null && !beingHunted)
             {
-                StartFoodPathfinding(); // finds a new food if current one has been eaten
+                if (huntEscapeTimer <= 0)
+                {
+                    StopCoroutine(FollowPath());
+                    StopCoroutine(UpdatePath());
+                    GetClosestFood();
+                    StartFoodPathfinding();
+                    huntEscapeTimer = 2; // reset the interval timer
+                }
+                else
+                {
+                    huntEscapeTimer -= Time.deltaTime; // timer counts 
+                }
             }
-            //else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
+            else if (isHungry && isFindingFood && nearestFoodItem != null && !moving && !beingHunted)
+            {
+                if (huntEscapeTimer <= 0)
+                {
+                    //StopCoroutine(FollowPath());
+                    //StopCoroutine(UpdatePath());
+                    //StopAllCoroutines();
 
-            if (readyToMate && !mateFound && !isHungry && !isFindingFood)
+                    target = nearestFoodItem.transform.position;
+                    Pathfind();
+
+                    StartFoodPathfinding();
+                    huntEscapeTimer = 2; // reset the interval timer
+                    return;
+                }
+                else
+                {
+                    huntEscapeTimer -= Time.deltaTime; // timer counts 
+                }
+                //moving = true;
+            }
+
+            if (readyToMate && !mateFound && !isHungry && !isFindingFood && !beingHunted)
             {
                 mateConditionsMet = true;
             }
@@ -282,7 +322,7 @@ public class Animal : MonoBehaviour
                 mateConditionsMet = false;
             }
 
-            if (mateConditionsMet)
+            if (mateConditionsMet && !beingHunted)
             {
                 FindNearestMate(); // locate the nearest potential mate
                 if (nearestMate != null) // only pathfinds to a potential mate if the mate is also ready to mate
@@ -314,6 +354,7 @@ public class Animal : MonoBehaviour
                 if (huntEscapeTimer <= 0)
                 {
                     Debug.Log("<<<<<<<<");
+                    moving = false;
                     StopCoroutine(FollowPath());
                     RandomMovement();
                     huntEscapeTimer = 3; // reset the interval timer
@@ -352,6 +393,10 @@ public class Animal : MonoBehaviour
         {
             Debug.Log("hungry");
             isHungry = true;
+        }
+        else
+        {
+            isHungry = false;
         }
     }
 
@@ -489,6 +534,7 @@ public class Animal : MonoBehaviour
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
 
+        target = nearestMate.transform.position;
         StartCoroutine("UpdatePath");
 
         //this.gameObject.GetComponent<Rabbit>().Pathfind();
@@ -542,7 +588,10 @@ public class Animal : MonoBehaviour
         {
             StopCoroutine(FollowPath());
             moving = false;
-            mateFound = false;
+            if (mateFound)
+                mateFound = false;
+            if (isFindingFood)
+                isFindingFood = false;
         }
     }
 

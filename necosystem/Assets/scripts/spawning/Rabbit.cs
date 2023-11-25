@@ -128,8 +128,8 @@ public class Rabbit : Animal
         Vector3 rabbitPos = gameObject.transform.position;
         Vector3 newPos = rabbitPos + (Vector3.one * posOffset);
 
-        GameObject AnimalSpawner = GameObject.Find("Animal Spawner");
-        GameObject babyRabbit = Instantiate(babyPrefab, AnimalSpawner.transform); // instantiate new babyRabbit with the animal spawner object as a parent in hierarchy
+        GameObject Rabbits = GameObject.Find("Rabbits");
+        GameObject babyRabbit = Instantiate(babyPrefab, Rabbits.transform); // instantiate new babyRabbit with the animal spawner object as a parent in hierarchy
         babyRabbit.transform.position = newPos;
 
         animator.SetBool("Walking", false);
@@ -290,22 +290,32 @@ public class Rabbit : Animal
                 targetPosOld = target;
 
                 if (mateFound)
-                    target = nearestMate.transform.position;
+                {
+                    if (nearestMate == null)
+                        yield break;
+                    else
+                        target = nearestMate.transform.position;
+                }
                 else if (isFindingFood)
-                    target = nearestFoodItem.transform.position;
+                {
+                    if (nearestFoodItem == null)
+                        yield break;
+                    else
+                        target = nearestFoodItem.transform.position;
+                }
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
 
 
                 dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target);
-                if (dstFromTarget < 2)
+                if (dstFromTarget < 3)
                 {
                     StopCoroutine("FollowPath");
 
                     if (mateFound)
-                        Mate();
+                        WaitBeforeMating();
                     else if (isFindingFood)
-                        EatFood();
+                        WaitBeforeEating();
 
                     StopCoroutine("UpdatePath");
                 }
