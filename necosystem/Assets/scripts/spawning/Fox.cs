@@ -207,6 +207,7 @@ public class Fox : Animal
         GameObject Foxes = GameObject.Find("Foxes");
         GameObject babyFox = Instantiate(babyPrefab, Foxes.transform); // instantiate new babyFox with the animal spawner object as a parent in hierarchy
         babyFox.transform.position = newPos;
+        babyFox.name = "Fox";
 
         animator.SetBool("Walking", false);
 
@@ -214,7 +215,7 @@ public class Fox : Animal
             StartCoroutine(DelayForBabyValues(babyFox));
     }
 
-    private IEnumerator DelayForBabyValues(GameObject babyFox)
+    public IEnumerator DelayForBabyValues(GameObject babyFox)
     {
         yield return new WaitForSeconds(0.2f);
 

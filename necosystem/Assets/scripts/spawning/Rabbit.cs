@@ -131,6 +131,7 @@ public class Rabbit : Animal
         GameObject Rabbits = GameObject.Find("Rabbits");
         GameObject babyRabbit = Instantiate(babyPrefab, Rabbits.transform); // instantiate new babyRabbit with the animal spawner object as a parent in hierarchy
         babyRabbit.transform.position = newPos;
+        babyRabbit.name = "Rabbit";
 
         animator.SetBool("Walking", false);
 
@@ -138,7 +139,7 @@ public class Rabbit : Animal
             StartCoroutine(DelayForBabyValues(babyRabbit));
     }
 
-    private IEnumerator DelayForBabyValues(GameObject babyRabbit)
+    public IEnumerator DelayForBabyValues(GameObject babyRabbit)
     {
         yield return new WaitForSeconds(0.2f);
 

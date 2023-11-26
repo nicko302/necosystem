@@ -145,7 +145,7 @@ public class MenuScript : MonoBehaviour
     public void Exit()
     {
         Application.Quit();
-        UnityEditor.EditorApplication.isPlaying = false;
+        //UnityEditor.EditorApplication.isPlaying = false;
     }
 
     public void RandomiseSeed() //seed randomiser

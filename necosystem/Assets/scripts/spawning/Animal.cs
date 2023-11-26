@@ -16,6 +16,7 @@ public class Animal : MonoBehaviour
     public int libido;
 
     [Header("BirthAttributes")]
+    public string animalName;
     [Tooltip("How fast the animal can travel")]
     [Range(30, 70)]
     public int intSpeed; // an easier value of speed to compare and alter
@@ -115,9 +116,9 @@ public class Animal : MonoBehaviour
     {
         health = UnityEngine.Random.Range(90, 100);
         libido = UnityEngine.Random.Range(90, 100);
-        if (GetComponent<Rabbit>() != null) { lifespan = UnityEngine.Random.Range(7, 11); }
-        else if (GetComponent<Fox>() != null) { lifespan = UnityEngine.Random.Range(4, 7); }
-        
+        if (GetComponent<Rabbit>() != null) { lifespan = UnityEngine.Random.Range(7, 11); animalName = "Rabbit";  }
+        else if (GetComponent<Fox>() != null) { lifespan = UnityEngine.Random.Range(4, 7); animalName = "Fox"; }
+
         age = UnityEngine.Random.Range(1, 2);
         ageCounter = UnityEngine.Random.Range(0, 3);
 

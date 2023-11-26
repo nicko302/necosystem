@@ -36,6 +36,7 @@ public class AnimalSpawn : MonoBehaviour
                     GameObject fox = Instantiate(foxPrefab, foxesParent.transform);
                     fox.transform.position = new Vector3(x, 60, y);
                     fox.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
+                    fox.name = "Fox";
                 }
             }
     }
@@ -51,6 +52,7 @@ public class AnimalSpawn : MonoBehaviour
                     GameObject rabbit = Instantiate(rabbitPrefab, rabbitsParent.transform);
                     rabbit.transform.position = new Vector3(x, 60, y);
                     rabbit.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360f), 0);
+                    rabbit.name = "Rabbit";
                 }
             }
     }
