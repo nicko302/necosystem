@@ -41,6 +41,8 @@ public class Animal : MonoBehaviour
     [Header("Pathfinding variables")]
     public Vector3 target;
     public float dstFromTarget;
+    public float oldDstFromTarget;
+    public float movementCheckTimer;
 
     public bool exceptionCaught;
 
@@ -60,9 +62,7 @@ public class Animal : MonoBehaviour
     protected GameObject nearestFoodItem;
     public bool beingHunted;
     [SerializeField]
-    protected bool huntedEscapeOnce;
-    [SerializeField]
-    protected float huntEscapeTimer;
+    protected float foodPathFindingTimer;
 
     [Header("Mating variables")]
     public bool isBaby = false;
@@ -271,50 +271,49 @@ public class Animal : MonoBehaviour
 
         if (afterSceneLoad)
         {
-            if (isHungry && !isFindingFood && !beingHunted)
+            if (isHungry && !isFindingFood)
             {
                 StartFoodPathfinding();
                 isHungry = false;
                 isFindingFood = true;
             }
-            else if (isHungry && isFindingFood && nearestFoodItem == null && !beingHunted)
+            else if (isHungry && isFindingFood && nearestFoodItem == null)
             {
-                if (huntEscapeTimer <= 0)
+                if (foodPathFindingTimer <= 0)
                 {
                     StopCoroutine(FollowPath());
                     StopCoroutine(UpdatePath());
                     GetClosestFood();
                     StartFoodPathfinding();
-                    huntEscapeTimer = 2; // reset the interval timer
+                    foodPathFindingTimer = 2; // reset the interval timer
                 }
                 else
                 {
-                    huntEscapeTimer -= Time.deltaTime; // timer counts 
+                    foodPathFindingTimer -= Time.deltaTime; // timer counts 
                 }
             }
-            else if (isHungry && isFindingFood && nearestFoodItem != null && !moving && !beingHunted)
+            else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
             {
-                if (huntEscapeTimer <= 0)
+                if (foodPathFindingTimer <= 0)
                 {
                     //StopCoroutine(FollowPath());
                     //StopCoroutine(UpdatePath());
                     //StopAllCoroutines();
 
                     target = nearestFoodItem.transform.position;
-                    Pathfind();
 
                     StartFoodPathfinding();
-                    huntEscapeTimer = 2; // reset the interval timer
+                    foodPathFindingTimer = 2; // reset the interval timer
                     return;
                 }
                 else
                 {
-                    huntEscapeTimer -= Time.deltaTime; // timer counts 
+                    foodPathFindingTimer -= Time.deltaTime; // timer counts 
                 }
                 //moving = true;
             }
 
-            if (readyToMate && !mateFound && !isHungry && !isFindingFood && !beingHunted)
+            if (readyToMate && !mateFound && !isHungry && !isFindingFood)
             {
                 mateConditionsMet = true;
             }
@@ -323,7 +322,7 @@ public class Animal : MonoBehaviour
                 mateConditionsMet = false;
             }
 
-            if (mateConditionsMet && !beingHunted)
+            if (mateConditionsMet)
             {
                 FindNearestMate(); // locate the nearest potential mate
                 if (nearestMate != null) // only pathfinds to a potential mate if the mate is also ready to mate
@@ -349,22 +348,6 @@ public class Animal : MonoBehaviour
                 }
             }
 
-            if (beingHunted)
-            {
-                canWander = false;
-                if (huntEscapeTimer <= 0)
-                {
-                    Debug.Log("<<<<<<<<");
-                    moving = false;
-                    StopCoroutine(FollowPath());
-                    RandomMovement();
-                    huntEscapeTimer = 3; // reset the interval timer
-                }
-                else //if animal is currently moving and timer reached zero
-                {
-                    huntEscapeTimer -= Time.deltaTime; // timer counts 
-                }
-            }
             else
             { canWander = true; }
 
@@ -381,6 +364,40 @@ public class Animal : MonoBehaviour
             if (dead)
             {
                 Die();
+            }
+
+            if (mateFound || isFindingFood)
+            {
+                if (movementCheckTimer <= 0)
+                {
+                    oldDstFromTarget = dstFromTarget;
+                    dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target);
+
+                    if (dstFromTarget == oldDstFromTarget)
+                    {
+                        StopCoroutine(UpdatePath()); StopCoroutine(FollowPath()); StopAllCoroutines();
+                        nearestMate = null; moving = false; target = Vector3.zero;
+
+                        if (isFindingFood)
+                        {
+                            StartFoodPathfinding();
+                        }
+                        else if (mateFound)
+                        {
+                            //FindNearestMate();
+                            StartMatePathfinding();
+                        }
+
+                        StartCoroutine(UpdatePath());
+                        Debug.Log("===== retrying pathfinding...");
+                    }
+
+                    movementCheckTimer = 3; // reset the interval timer
+                }
+                else
+                {
+                    movementCheckTimer -= Time.deltaTime; // timer counts 
+                }
             }
         }
     }
@@ -440,6 +457,7 @@ public class Animal : MonoBehaviour
     {
         moving = false;
 
+        canWander = true;
         Debug.Log("stopping wander");
         StopCoroutine("FollowPath");
         animator.SetBool("Walking", false);
@@ -522,6 +540,7 @@ public class Animal : MonoBehaviour
 
         animator.SetBool("Eat", false);
 
+        canWander = false; moving = true;
         Debug.Log("0");
 
         Pathfind();
@@ -531,11 +550,13 @@ public class Animal : MonoBehaviour
     {
         moving = true;
         Debug.Log("Finding mate");
+        canWander = false;
 
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
 
         target = nearestMate.transform.position;
+        moving = true;
         StartCoroutine("UpdatePath");
 
         //this.gameObject.GetComponent<Rabbit>().Pathfind();
@@ -711,12 +732,6 @@ public class Animal : MonoBehaviour
         }
         yield return null;
         }
-    }
-
-    IEnumerator DelayForHuntEscape()
-    {
-        yield return new WaitForSeconds(0.5f);
-        huntedEscapeOnce = false;
     }
 
     #endregion

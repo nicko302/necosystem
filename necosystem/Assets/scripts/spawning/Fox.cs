@@ -123,6 +123,7 @@ public class Fox : Animal
             animator.SetBool("Eat", false);
 
             Debug.Log("JAJAJAJAJA");
+            canWander = false; moving = true;
             StartCoroutine(UpdatePath());
         }
     }
@@ -348,6 +349,7 @@ public class Fox : Animal
                         WaitBeforeEating();
                     }
 
+                    canWander = true;
 
                     Debug.Log("MET TARGET");
                     StopCoroutine("UpdatePath");

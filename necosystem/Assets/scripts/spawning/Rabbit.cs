@@ -53,6 +53,7 @@ public class Rabbit : Animal
 
             animator.SetBool("Eat", false);
             animator.SetBool("Walking", false);
+            moving = false; canWander = true;
         }
     }
     #endregion
@@ -317,6 +318,8 @@ public class Rabbit : Animal
                         WaitBeforeMating();
                     else if (isFindingFood)
                         WaitBeforeEating();
+
+                    canWander = true;
 
                     StopCoroutine("UpdatePath");
                 }
