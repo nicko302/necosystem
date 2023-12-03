@@ -42,7 +42,12 @@ public class Animal : MonoBehaviour
     public Vector3 target;
     public float dstFromTarget;
     public float oldDstFromTarget;
+    public Vector3 comparePos = Vector3.zero;
+    public float dstFromComparePos;
+    public float oldDstFromComparePos;
     public float movementCheckTimer;
+    public float pathfindTimeElapsed = 50f;
+    public bool repeat = true;
 
     public bool exceptionCaught;
 
@@ -142,31 +147,46 @@ public class Animal : MonoBehaviour
     {
         Debug.Log("mating...");
     }
-    public virtual void Die()
-    {
-        Debug.Log("dead");
 
-        // stop animal from pathfinding
-        isHungry = false; isFindingFood = true; moving = true; canWander = false;
-        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
+    public IEnumerator Die()
+    {
+        // stop movement
+        health = 100; libido = 100;
+        canWander = false;
 
         // stop current animations
+        animator.SetBool("Walking", false);
+        animator.SetBool("Eat", false);
 
-        // die animation
-
-        StartCoroutine("DestroyDelay");
-    }
-
-    public virtual IEnumerator DestroyDelay()
-    {
-        yield return new WaitForSeconds(3);
+        // die
+        animator.SetBool("Die", true);
+        yield return new WaitForSeconds(4f);
         Destroy(this.gameObject);
     }
 
     protected IEnumerator WaitBeforeEating()
     {
+        if (gameObject.GetComponent<Fox>() != null) // stop rabbit moving before killing it
+        {
+            if (nearestFoodItem != null)
+            {
+                nearestFoodItem.GetComponent<Animal>().beingHunted = false;
+                nearestFoodItem.GetComponent<Animal>().moving = false;
+                nearestFoodItem.GetComponent<Animal>().canWander = false;
+                nearestFoodItem.GetComponent<Animal>().animator.SetBool("Walking", false);
+                nearestFoodItem.GetComponent<Animal>().StopCoroutine("FollowPath");
+                nearestFoodItem.GetComponent<Animal>().StopCoroutine("UpdatePath");
+            }
+            else
+            {
+                GetClosestFood();
+                StartFoodPathfinding();
+                StopCoroutine(WaitBeforeEating());
+            }
+        }
         Debug.Log("WaitBeforeEating");
         animator.SetBool("Walking", false);
+        animator.SetBool("Eat", true);
         yield return new WaitForSeconds(3);
         animator.SetBool("Walking", false);
         EatFood();
@@ -200,11 +220,12 @@ public class Animal : MonoBehaviour
 
     private void Update()
     {
+        CheckDeath();
+
         if (!(isHungry || mateFound)) // if the animal does not currently have a strong need
         {
             CheckHunger();
             CheckLibido();
-            CheckDeath();
 
             // checks every frame to see if the timer has reached zero
             if (canWander)
@@ -271,49 +292,16 @@ public class Animal : MonoBehaviour
 
         if (afterSceneLoad)
         {
-            if (isHungry && !isFindingFood)
+            // food pathfinding
+            if (isHungry && !isFindingFood) // if hungry and not currently finding food, find food
             {
                 StartFoodPathfinding();
                 isHungry = false;
                 isFindingFood = true;
             }
-            else if (isHungry && isFindingFood && nearestFoodItem == null)
-            {
-                if (foodPathFindingTimer <= 0)
-                {
-                    StopCoroutine(FollowPath());
-                    StopCoroutine(UpdatePath());
-                    GetClosestFood();
-                    StartFoodPathfinding();
-                    foodPathFindingTimer = 2; // reset the interval timer
-                }
-                else
-                {
-                    foodPathFindingTimer -= Time.deltaTime; // timer counts 
-                }
-            }
-            else if (isHungry && isFindingFood && nearestFoodItem != null && !moving)
-            {
-                if (foodPathFindingTimer <= 0)
-                {
-                    //StopCoroutine(FollowPath());
-                    //StopCoroutine(UpdatePath());
-                    //StopAllCoroutines();
-
-                    target = nearestFoodItem.transform.position;
-
-                    StartFoodPathfinding();
-                    foodPathFindingTimer = 2; // reset the interval timer
-                    return;
-                }
-                else
-                {
-                    foodPathFindingTimer -= Time.deltaTime; // timer counts 
-                }
-                //moving = true;
-            }
-
-            if (readyToMate && !mateFound && !isHungry && !isFindingFood)
+           
+            // mate pathfinding
+            if (readyToMate && !mateFound && !isHungry && !isFindingFood) // if wants to mate but hasnt found one, animal is able to mate
             {
                 mateConditionsMet = true;
             }
@@ -321,11 +309,10 @@ public class Animal : MonoBehaviour
             {
                 mateConditionsMet = false;
             }
-
-            if (mateConditionsMet)
+            if (mateConditionsMet) // if able to mate...
             {
                 FindNearestMate(); // locate the nearest potential mate
-                if (nearestMate != null) // only pathfinds to a potential mate if the mate is also ready to mate
+                if (nearestMate != null) // only pathfind to a potential mate if the mate is also ready to mate
                 {
                     StartMatePathfinding();
                     readyToMate = false;
@@ -333,6 +320,72 @@ public class Animal : MonoBehaviour
                 }
             }
 
+            // pathfinding bug fixes / error handling
+            if (mateFound || isFindingFood) // if currently pathfinding
+            {
+                if (isFindingFood && nearestFoodItem == null)
+                {
+                    GetClosestFood();
+                    StartFoodPathfinding();
+                }
+
+                if (movementCheckTimer <= 0)
+                {
+                    oldDstFromComparePos = dstFromComparePos;
+                    dstFromComparePos = Vector3.Distance(this.gameObject.transform.position, comparePos);
+
+                    if (dstFromComparePos == oldDstFromComparePos) // if animal hasnt moved in 2 seconds, reattempt pathfinding
+                    {
+                        StopCoroutine(UpdatePath()); StopCoroutine(FollowPath()); StopAllCoroutines();
+                        nearestMate = null; moving = false; target = Vector3.zero;
+
+                        if (isFindingFood)
+                        {
+                            StartFoodPathfinding();
+                        }
+                        else if (mateFound)
+                        {
+                            FindNearestMate();
+                            StartMatePathfinding();
+                        }
+
+                        StartCoroutine(UpdatePath());
+                        Debug.Log("===== retrying pathfinding...");
+                    }
+
+                    dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target); // calculate distance to target
+
+                    if (dstFromTarget < 6) // if close enough to the target, eat/mate accordingly
+                    {
+                        StopCoroutine("UpdatePath"); StopCoroutine("FollowPath"); moving = false;
+
+                        if (mateFound)
+                            StartCoroutine(WaitBeforeMating());
+                        else if (isFindingFood)
+                            StartCoroutine(WaitBeforeEating());
+
+                    }
+
+                    movementCheckTimer = 2; // reset the interval timer
+                }
+                else
+                {
+                    movementCheckTimer -= Time.deltaTime; // timer counts 
+                }
+
+                
+
+                pathfindTimeElapsed -= Time.deltaTime;
+
+                if (pathfindTimeElapsed <= 0) // if animal is stuck on pathfinding for 30 seconds, die
+                {
+                    StartCoroutine(Die());
+                }
+            }
+            else
+                pathfindTimeElapsed = 50f; // if not pathfinding, time elapsed resets
+
+            // baby determination
             if (GetComponent<Rabbit>() != null)
             {
                 if (age > 2)
@@ -348,56 +401,16 @@ public class Animal : MonoBehaviour
                 }
             }
 
-            else
-            { canWander = true; }
-
-            if (age == lifespan)
-            {
-                Die();
-            }
-
+            // movement animation check
             if (moving)
                 animator.SetBool("Walking", true);
             else
                 animator.SetBool("Walking", false);
 
-            if (dead)
+            // death check
+            if (age == lifespan)
             {
-                Die();
-            }
-
-            if (mateFound || isFindingFood)
-            {
-                if (movementCheckTimer <= 0)
-                {
-                    oldDstFromTarget = dstFromTarget;
-                    dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target);
-
-                    if (dstFromTarget == oldDstFromTarget)
-                    {
-                        StopCoroutine(UpdatePath()); StopCoroutine(FollowPath()); StopAllCoroutines();
-                        nearestMate = null; moving = false; target = Vector3.zero;
-
-                        if (isFindingFood)
-                        {
-                            StartFoodPathfinding();
-                        }
-                        else if (mateFound)
-                        {
-                            //FindNearestMate();
-                            StartMatePathfinding();
-                        }
-
-                        StartCoroutine(UpdatePath());
-                        Debug.Log("===== retrying pathfinding...");
-                    }
-
-                    movementCheckTimer = 3; // reset the interval timer
-                }
-                else
-                {
-                    movementCheckTimer -= Time.deltaTime; // timer counts 
-                }
+                StartCoroutine(Die());
             }
         }
     }
@@ -430,7 +443,7 @@ public class Animal : MonoBehaviour
     {
         if (this.gameObject.GetComponent<Animal>().health <= 10)
         {
-            dead = true;
+            StartCoroutine(Die());
         }
     }
 
@@ -555,7 +568,21 @@ public class Animal : MonoBehaviour
         animator.SetBool("Walking", true);
         animator.SetBool("Eat", false);
 
-        target = nearestMate.transform.position;
+        Debug.Log(nearestMate);
+        Debug.Log(target);
+
+        try
+        {
+            target = new Vector3(nearestMate.transform.position.x, nearestMate.transform.position.y, nearestMate.transform.position.z);
+        }
+        catch
+        {
+            nearestMate = null;
+            /*
+            FindNearestMate();
+            target = new Vector3 (nearestMate.transform.position.x, nearestMate.transform.position.y, nearestMate.transform.position.z);
+            */
+        }
         moving = true;
         StartCoroutine("UpdatePath");
 
@@ -665,7 +692,10 @@ public class Animal : MonoBehaviour
         }
         catch
         {
-            Die();
+            followingPath = false;
+            StopCoroutine(FollowPath());
+            StopCoroutine(UpdatePath());
+            canWander = true;
         }
 
         float speedPercent = 1;
@@ -687,7 +717,9 @@ public class Animal : MonoBehaviour
             catch
             {
                 followingPath = false;
-                StopCoroutine("FollowPath");
+                StopCoroutine(FollowPath());
+                StopCoroutine(UpdatePath());
+                canWander = true;
             }
 
             if (followingPath)
@@ -705,7 +737,9 @@ public class Animal : MonoBehaviour
                     catch
                     {
                         followingPath = false;
-                        StopCoroutine("FollowPath");
+                        StopCoroutine(FollowPath());
+                        StopCoroutine(UpdatePath());
+                        canWander = true;
                     }
                 }
 
@@ -713,24 +747,8 @@ public class Animal : MonoBehaviour
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
             }
-            if (followingPath == false)
-            {
-                if (isHungry)
-                {
-                    animator.SetBool("Eat", true);
-                    StartCoroutine(WaitBeforeEating());
-                }
-                else if (mateFound)
-                {
-                    if (runOnce)
-                    {
-                        Debug.Log("#Close to mate");
-                        StartCoroutine(WaitBeforeMating());
-                        StopCoroutine("FollowPath");
-                    }
-                }
-        }
-        yield return null;
+
+            yield return null;
         }
     }
 

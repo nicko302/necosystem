@@ -114,12 +114,13 @@ public class Rabbit : Animal
         mateFound = false;
 
         float chance = Random.Range(0f, 1f);
-        if (chance <= 0.6f)
+        if (chance <= 0.4f)
         {
             SpawnRabbit();
         }
         animator.SetBool("Walking", false);
         runOnce = true;
+        canWander = true;
 
         allPotentialMates = null;
     }
@@ -163,102 +164,6 @@ public class Rabbit : Animal
         {
            //do nothing;
         }
-    }
-
-    #endregion
-
-    #region Water methods
-    /************************************ Rabbit drink water
-    [ContextMenu("R - Locate nearest water")]
-    public void GetClosestWater() //locates the nearest water
-    {
-        //////////// CALCULATE NEAREST NODE BELOW Y = 2.5
-
-        nearestFoodItem = null;
-        allFoodItems = null;
-
-        allFoodItems = GameObject.FindGameObjectsWithTag("Grass");
-
-        distance = 0;
-        nearestDistance = 10000;
-
-        for (int i = 0; i < allFoodItems.Length; i++)
-        {
-            distance = Vector3.Distance(this.transform.position, allFoodItems[i].transform.position);
-
-            if (distance < nearestDistance)
-            {
-                nearestFoodItem = allFoodItems[i];
-                nearestDistance = distance;
-            }
-        }
-    }
-
-    [ContextMenu("R - Pathfind food")]
-    public override void LocateWater()
-    {
-        animator.SetBool("Walking", true);
-        animator.SetBool("Eat", false);
-        PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-    }
-
-    
-    [ContextMenu("R - Drink Water")]
-    public override void DrinkWater() //destroys/eats grass object
-    {
-        this.gameObject.GetComponent<Rabbit>().GetClosestWater();
-
-        if (nearestDistance < 3)
-        {
-            //isFindingWater = false;
-            //thirsty = false;
-
-            Debug.Log("drinking water");
-
-            this.gameObject.GetComponent<AnimalAttributes>().thirst = 100;
-
-            animator.SetBool("Eat", false);
-            animator.SetBool("Walking", false);
-        }
-    }
-    *////////////////////////////////////////
-    #endregion
-
-    #region Animal functions
-    public override void Die()
-    {
-        Debug.Log("dead");
-
-        // stop animal from pathfinding
-        isHungry = false; isFindingFood = true; moving = true; canWander = false;
-        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
-        beingHunted = false;
-
-        // stop current animations
-        animator.SetBool("Walking", false);
-        animator.SetBool("Eat", false);
-
-        // die
-        animator.SetBool("Die", true);
-
-        StartCoroutine("DestroyDelay");
-    }
-    public override IEnumerator DestroyDelay()
-    {
-        Debug.Log("dead");
-
-        // stop animal from pathfinding
-        isHungry = false; isFindingFood = true; moving = true; canWander = false;
-        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
-
-        // stop current animations
-        animator.SetBool("Walking", false);
-        animator.SetBool("Eat", false);
-
-        // die
-        animator.SetBool("Die", true);
-        yield return new WaitForSeconds(5f);
-        Destroy(this.gameObject);
     }
 
     #endregion
@@ -307,22 +212,6 @@ public class Rabbit : Animal
                 }
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-
-
-                dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target);
-                if (dstFromTarget < 3)
-                {
-                    StopCoroutine("FollowPath");
-
-                    if (mateFound)
-                        WaitBeforeMating();
-                    else if (isFindingFood)
-                        WaitBeforeEating();
-
-                    canWander = true;
-
-                    StopCoroutine("UpdatePath");
-                }
             }
         }
     }

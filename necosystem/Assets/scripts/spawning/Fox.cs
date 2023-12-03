@@ -45,7 +45,6 @@ public class Fox : Animal
                 nearestDistance = distance;
                 nearestFoodItem.gameObject.GetComponent<Rabbit>().StopCoroutine("FollowPath");
                 nearestFoodItem.gameObject.GetComponent<Rabbit>().beingHunted = true;
-                nearestFoodItem.gameObject.GetComponent<Rabbit>().canWander = false;
             }
         }
     }
@@ -75,7 +74,7 @@ public class Fox : Animal
             isHungry = false;
 
             Debug.Log("destroying rabbit");
-            rabbit.GetComponent<Rabbit>().Die();
+            rabbit.GetComponent<Rabbit>().StartCoroutine("Die");
             Debug.Log("rabbit destroyed");
 
             this.gameObject.GetComponent<Animal>().health = 100;
@@ -83,6 +82,7 @@ public class Fox : Animal
             animator.SetBool("Eat", false);
             animator.SetBool("Walking", false);
 
+        canWander = true;
         moving = false;
         //}
         //else if (nearestDistance > 10)
@@ -95,26 +95,14 @@ public class Fox : Animal
     {
         {
             GetClosestFood();
-            bool doReturn = false;
             try
             {
                 target = nearestFoodItem.transform.position;
             }
             catch
             {
-                try
-                {
-                    GetClosestFood();
-                    target = nearestFoodItem.transform.position;
-                }
-                catch
-                {
-                    doReturn = true;
-                }
-            }
-            if (doReturn)
-            {
-                return;
+                GetClosestFood();
+                target = nearestFoodItem.transform.position;
             }
 
             nearestFoodItem.GetComponent<Animal>().beingHunted = true;
@@ -196,6 +184,7 @@ public class Fox : Animal
         }
         animator.SetBool("Walking", false);
         runOnce = true;
+        canWander = true;
 
         allPotentialMates = null;
     }
@@ -239,45 +228,6 @@ public class Fox : Animal
         {
             //do nothing;
         }
-    }
-
-    #endregion
-
-    #region Animal functions
-    public override void Die()
-    {
-        Debug.Log("dead");
-
-        // stop animal from pathfinding
-        isHungry = false; isFindingFood = true; canWander = false;
-        gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
-
-        // stop current animations
-        animator.SetBool("Walking", false);
-        animator.SetBool("Eat", false);
-
-        // die
-        animator.SetBool("Die", true);
-
-        StartCoroutine("DestroyDelay");
-    }
-    public override IEnumerator DestroyDelay()
-    {
-        Debug.Log("dead");
-
-        // stop animal from pathfinding
-        isHungry = false; isFindingFood = true; canWander = false;
-        StopCoroutine("DelayForWanderAI"); StopCoroutine("FollowPath");
-
-        // stop current animations
-        animator.SetBool("Walking", false);
-        animator.SetBool("Eat", false);
-
-        // die
-        animator.SetBool("Die", true);
-        yield return new WaitForSeconds(6f);
-        Destroy(this.gameObject);
     }
 
     #endregion
@@ -326,34 +276,6 @@ public class Fox : Animal
                 }
 
                 PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-
-
-                dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target);
-                if (dstFromTarget < 7)
-                {
-                    StopCoroutine("FollowPath");
-                    moving = false;
-
-                    if (mateFound)
-                    {
-                        WaitBeforeMating();
-                    }
-                    else if (isFindingFood)
-                    {
-                        nearestFoodItem.GetComponent<Animal>().beingHunted = false;
-                        nearestFoodItem.GetComponent<Animal>().moving = false;
-                        nearestFoodItem.GetComponent<Animal>().canWander = false;
-                        nearestFoodItem.GetComponent<Animal>().animator.SetBool("Walking", false);
-                        nearestFoodItem.GetComponent<Animal>().StopCoroutine("FollowPath");
-                        nearestFoodItem.GetComponent<Animal>().StopCoroutine("UpdatePath");
-                        WaitBeforeEating();
-                    }
-
-                    canWander = true;
-
-                    Debug.Log("MET TARGET");
-                    StopCoroutine("UpdatePath");
-                }
             }
         }
     }
