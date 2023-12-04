@@ -223,6 +223,8 @@ public class Fox : Animal
             babyFox.GetComponent<Fox>().ageCounter = 0;
             babyFox.GetComponent<Fox>().isFindingFood = false;
             babyFox.GetComponent<Fox>().isHungry = false;
+            babyFox.GetComponent<Fox>().outline = gameObject.GetComponent<Outline>();
+            babyFox.GetComponent<Fox>().outline.enabled = false;
         }
         catch
         {

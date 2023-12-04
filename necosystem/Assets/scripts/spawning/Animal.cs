@@ -160,7 +160,7 @@ public class Animal : MonoBehaviour
 
         // die
         animator.SetBool("Die", true);
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(4);
         Destroy(this.gameObject);
     }
 
@@ -329,6 +329,20 @@ public class Animal : MonoBehaviour
                     StartFoodPathfinding();
                 }
 
+                if (mateFound && nearestMate == null)
+                {
+                    FindNearestMate();
+                    StartMatePathfinding();
+                }
+
+                if (nearestMate != null && nearestMate.gameObject.GetComponent<Animal>().libido > 30)
+                {
+                    nearestMate.gameObject.GetComponent<Animal>().readyToMate = false;
+                    nearestMate = null;
+                    FindNearestMate();
+                    StartMatePathfinding();
+                }
+
                 if (movementCheckTimer <= 0)
                 {
                     oldDstFromComparePos = dstFromComparePos;
@@ -339,6 +353,7 @@ public class Animal : MonoBehaviour
                         StopCoroutine(UpdatePath()); StopCoroutine(FollowPath()); StopAllCoroutines();
                         nearestMate = null; moving = false; target = Vector3.zero;
 
+                        /*
                         if (isFindingFood)
                         {
                             StartFoodPathfinding();
@@ -347,7 +362,7 @@ public class Animal : MonoBehaviour
                         {
                             FindNearestMate();
                             StartMatePathfinding();
-                        }
+                        }*/
 
                         StartCoroutine(UpdatePath());
                         Debug.Log("===== retrying pathfinding...");
