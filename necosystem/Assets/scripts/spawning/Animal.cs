@@ -331,8 +331,9 @@ public class Animal : MonoBehaviour
 
                 if (mateFound && nearestMate == null)
                 {
-                    FindNearestMate();
-                    StartMatePathfinding();
+                    //FindNearestMate();
+                    //StartMatePathfinding();
+                    WaitBeforeMating();
                 }
 
                 if (nearestMate != null && nearestMate.gameObject.GetComponent<Animal>().libido > 30)
@@ -364,8 +365,13 @@ public class Animal : MonoBehaviour
                             StartMatePathfinding();
                         }*/
 
-                        StartCoroutine(UpdatePath());
-                        Debug.Log("===== retrying pathfinding...");
+                        //StartCoroutine(UpdatePath());
+                        //Debug.Log("===== retrying pathfinding...");
+
+                        if (readyToMate || mateFound)
+                        {
+                            Mate();
+                        }
                     }
 
                     dstFromTarget = Vector3.Distance(this.gameObject.transform.position, target); // calculate distance to target
