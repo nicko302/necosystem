@@ -94,6 +94,7 @@ public class MenuScript : MonoBehaviour
             }
             if (menuOptions.alpha == 0 || generatorOptions.alpha >= 1)
             {
+                generatorOptions.interactable = true;
                 menuGroup.SetActive(false);
                 genFadeIn = false;
             }
@@ -115,6 +116,7 @@ public class MenuScript : MonoBehaviour
             if (menuOptions.alpha >= 1 || generatorOptions.alpha == 0)
             {
                 generatorGroup.SetActive(false);
+                menuOptions.interactable = true;
                 menuFadeIn = false;
             }
         }

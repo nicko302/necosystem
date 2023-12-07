@@ -113,6 +113,7 @@ public class Animal : MonoBehaviour
     public bool runOnce = true;
     public ValueBar valueBar;
     public Outline outline;
+    [SerializeField] SelectedAnimals selectedAnimals;
 
     Grid grid;
     #endregion
@@ -153,6 +154,10 @@ public class Animal : MonoBehaviour
 
     protected void Die()
     {
+        // deselect animal
+        selectedAnimals.selectedAnimalsList.Remove(gameObject);
+        selectedAnimals.favouritedAnimalsList.Remove(gameObject);
+
         // stop movement
         health = 100; libido = 100;
         canWander = false;
@@ -213,6 +218,7 @@ public class Animal : MonoBehaviour
     #region Start/Update methods
     private void Start()
     {
+        selectedAnimals = GameObject.Find("Selected Animals").GetComponent<SelectedAnimals>();
         StartCoroutine("DelayForWanderAI");
 
         minInterval = 1;
