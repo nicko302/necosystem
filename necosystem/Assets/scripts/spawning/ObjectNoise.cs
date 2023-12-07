@@ -115,7 +115,7 @@ public class ObjectNoise : MonoBehaviour
     {
         Debug.Log("start");
         int scene = (SceneManager.GetActiveScene()).buildIndex;
-        if (scene == 2)
+        if (scene == 1)
         {
             StartCoroutine(WaitSeconds());
         }

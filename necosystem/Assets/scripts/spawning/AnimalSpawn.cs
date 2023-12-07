@@ -15,6 +15,12 @@ public class AnimalSpawn : MonoBehaviour
     public GameObject[] rabbitPrefabs;
     public int rabbitSpawnSparsity;
 
+    [Header("Data")]
+    public GameObject foxParent;
+    public GameObject rabbitParent;
+    public int foxCount;
+    public int rabbitCount;
+
     public int mapChunkSize
     {
         get
@@ -62,10 +68,13 @@ public class AnimalSpawn : MonoBehaviour
     {
         Debug.Log("start");
         int scene = (SceneManager.GetActiveScene()).buildIndex;
-        if (scene == 2)
+        if (scene == 1)
         {
             StartCoroutine(WaitSeconds());
         }
+
+        foxParent = GameObject.Find("Foxes");
+        rabbitParent = GameObject.Find("Rabbits");
     }
 
     IEnumerator WaitSeconds()
@@ -73,5 +82,11 @@ public class AnimalSpawn : MonoBehaviour
         yield return new WaitForSeconds(2);
         SpawnFox();
         SpawnRabbit();
+    }
+
+    private void Update()
+    {
+        foxCount = foxParent.transform.childCount;
+        rabbitCount = rabbitParent.transform.childCount;
     }
 }

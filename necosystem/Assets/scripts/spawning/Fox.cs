@@ -62,33 +62,23 @@ public class Fox : Animal
         }
         GameObject rabbit = nearestFoodItem.gameObject;
 
-        //if (nearestDistance < 5)
-        //{
-            rabbit.GetComponent<Rabbit>().beingHunted = false;
-            rabbit.GetComponent<Rabbit>().canWander = false;
-            rabbit.GetComponent<Rabbit>().StopAllCoroutines();
+        rabbit.GetComponent<Rabbit>().beingHunted = false;
+        rabbit.GetComponent<Rabbit>().canWander = false;
+        rabbit.GetComponent<Rabbit>().StopAllCoroutines();
 
-            Debug.Log("NearestDistance < 5");
 
-            isFindingFood = false;
-            isHungry = false;
+        isFindingFood = false;
+        isHungry = false;
 
-            Debug.Log("destroying rabbit");
-            rabbit.GetComponent<Rabbit>().StartCoroutine("Die");
-            Debug.Log("rabbit destroyed");
+        rabbit.GetComponent<Rabbit>().StartCoroutine("Die");
 
-            this.gameObject.GetComponent<Animal>().health = 100;
+        this.gameObject.GetComponent<Animal>().health = 100;
 
-            animator.SetBool("Eat", false);
-            animator.SetBool("Walking", false);
+        animator.SetBool("Eat", false);
+        animator.SetBool("Walking", false);
 
         canWander = true;
         moving = false;
-        //}
-        //else if (nearestDistance > 10)
-        //{
-        //rabbit.GetComponent<Rabbit>().beingHunted = false;
-        //}
     }
     
     public override void StartFoodPathfinding()
@@ -178,7 +168,7 @@ public class Fox : Animal
         mateFound = false;
 
         float chance = Random.Range(0f, 1f);
-        if (chance <= 0.6f)
+        if (chance <= 0.35f)
         {
             SpawnFox();
         }

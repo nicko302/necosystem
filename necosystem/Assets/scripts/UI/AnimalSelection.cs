@@ -104,7 +104,10 @@ public class AnimalSelection : MonoBehaviour
         }
         else if (!selected && !favourited)
         {
-            gameObject.GetComponent<Animal>().outline.enabled = false;
+            if (gameObject.GetComponent<Outline>().enabled == true)
+            {
+                gameObject.GetComponent<Animal>().outline.enabled = false;
+            }
             selectedAnimals.selectedAnimalsList.Remove(gameObject);
             inList = false;
         }

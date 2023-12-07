@@ -4,11 +4,13 @@ using UnityEngine;
 using System;
 using System.Threading;
 using static UnityEngine.EventSystems.EventTrigger;
+using UnityEngine.SceneManagement;
 
 public class mapGenerator : MonoBehaviour
 {
     public enum DrawMode { NoiseMap, Mesh, FalloffMap };
     public DrawMode drawMode;
+    private string seed;
 
     public terrainData terrainData;
     public noiseData noiseData;
@@ -40,6 +42,7 @@ public class mapGenerator : MonoBehaviour
     {
         textureData.ApplyToMaterial(terrainMaterial);
         textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
+        seed = noiseData.seed.ToString();
     }
 
     void OnValuesUpdated()

@@ -37,15 +37,16 @@ public class Rabbit : Animal
         Debug.Log("EatFood");
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
-        if (nearestDistance < 5)
-        {
             Debug.Log("NearestDistance < 5");
 
             isFindingFood = false;
             isHungry = false;
 
             Debug.Log("destroying grass");
-            Destroy(nearestFoodItem.transform.parent.gameObject);
+            if (nearestFoodItem != null)
+            {
+                Destroy(nearestFoodItem.transform.parent.gameObject);
+            }
             //nearestFoodItem.transform.parent.position = new Vector3(nearestFoodItem.transform.parent.position.x, 200, nearestFoodItem.transform.parent.position.z);
             Debug.Log("grass destroyed");
 
@@ -54,7 +55,6 @@ public class Rabbit : Animal
             animator.SetBool("Eat", false);
             animator.SetBool("Walking", false);
             moving = false; canWander = true;
-        }
     }
     #endregion
 

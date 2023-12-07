@@ -19,7 +19,13 @@ public class MenuScript : MonoBehaviour
     public Slider sizeSlider;
     public GameObject seedInput;
     public GameObject menuGroup;
+    public GameObject optionsGroup;
     public GameObject generatorGroup;
+
+    [Header("Fullscreen options")]
+    public GameObject exclusive;
+    public GameObject borderless;
+    public GameObject windowed;
 
     [Header("Island data")]
     public GameObject islandMesh;
@@ -58,6 +64,7 @@ public class MenuScript : MonoBehaviour
         terrainData.meshHeightMultiplier = 9;
         terrainData.uniformScale = 3;
 
+        optionsGroup.SetActive(false);
         menuGroup.GetComponent<CanvasGroup>().alpha = 1;
         generatorGroup.GetComponent<CanvasGroup>().alpha = 0;
     }
@@ -132,14 +139,35 @@ public class MenuScript : MonoBehaviour
 
         menuFadeIn = true;
     }
-    public void Load()
+
+    public void Options()
     {
-        Debug.Log("Load");
+        menuGroup.SetActive(false);
+        optionsGroup.SetActive(true);
+    }
+    public void OptionsBack()
+    {
+        menuGroup.SetActive(true);
+        optionsGroup.SetActive(false);
     }
 
-    public void Settings()
+    public void OptionsFullscreen()
     {
-        Debug.Log("Settings");
+        if (Screen.fullScreenMode == FullScreenMode.ExclusiveFullScreen)
+        {
+            Screen.fullScreenMode = FullScreenMode.Windowed; // windowed
+            exclusive.SetActive(false); windowed.SetActive(true);
+        }
+        if (Screen.fullScreenMode == FullScreenMode.Windowed)
+        {
+            Screen.fullScreenMode = FullScreenMode.FullScreenWindow; // borderless
+            windowed.SetActive(false); borderless.SetActive(true);
+        }
+        if (Screen.fullScreenMode == FullScreenMode.FullScreenWindow)
+        {
+            Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen; // exclusive
+            borderless.SetActive(false); exclusive.SetActive(true);
+        }
     }
 
     public void Exit()
@@ -197,7 +225,7 @@ public class MenuScript : MonoBehaviour
     public void OnClick() //when generator button is clicked
     {
         PlayerPrefs.SetString("seed", seed);
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(1);
     }
     #endregion
 }
