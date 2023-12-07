@@ -6,6 +6,7 @@ public class MouseToSpawnAnimal : MonoBehaviour
 {
     [SerializeField] private LayerMask interactableLayer;
     private ButtonController buttonController;
+    private AudioSource placeAudio;
     [Header("Spawn")]
     public GameObject rabbitPrefab;
     public GameObject foxPrefab;
@@ -13,6 +14,7 @@ public class MouseToSpawnAnimal : MonoBehaviour
 
     private void Start()
     {
+        placeAudio = GameObject.Find("PlaceSFX").GetComponent<AudioSource>();
         buttonController = GameObject.Find("ButtonController").GetComponent<ButtonController>();
     }
     void Update()
@@ -32,11 +34,11 @@ public class MouseToSpawnAnimal : MonoBehaviour
         {
             if (buttonController.animalKey == 1)
             {
-                SpawnFox(hit.point);
+                SpawnFox(hit.point); placeAudio.Play();
             }
             if (buttonController.animalKey == 2)
             {
-                SpawnRabbit(hit.point);
+                SpawnRabbit(hit.point); placeAudio.Play();
             }
         }
     }

@@ -11,6 +11,7 @@ public class ButtonController : MonoBehaviour
     private ButtonScript rabbitButton;
     public GameObject foxSpawnPrefab;
     public GameObject rabbitSpawnPrefab;
+    [SerializeField] AudioSource audioSource;
     private bool runOnce;
 
     private void Start()
@@ -21,6 +22,7 @@ public class ButtonController : MonoBehaviour
 
     public void FoxButton()
     {
+        audioSource.Play();
         if (foxButton.selected == false) // if not selected already
         {
             animalKey = 1;
@@ -45,6 +47,7 @@ public class ButtonController : MonoBehaviour
 
     public void RabbitButton()
     {
+        audioSource.Play();
         if (rabbitButton.selected == false) // if not selected already
         {
             animalKey = 2;

@@ -49,7 +49,7 @@ public class AnimalSelection : MonoBehaviour
             gameObject.GetComponent<Animal>().outline.enabled = true;
             gameObject.GetComponent<Animal>().outline.OutlineMode = Outline.Mode.OutlineAll;
             gameObject.GetComponent<Animal>().outline.OutlineColor = Color.blue;
-            gameObject.GetComponent<Animal>().outline.OutlineWidth = 4f;
+            gameObject.GetComponent<Animal>().outline.OutlineWidth = 3f;
             if (!inList)
             {
                 selectedAnimals.selectedAnimalsList.Add(gameObject);
@@ -60,7 +60,7 @@ public class AnimalSelection : MonoBehaviour
                 gameObject.GetComponent<Animal>().outline.enabled = true;
                 gameObject.GetComponent<Animal>().outline.OutlineMode = Outline.Mode.OutlineAll;
                 gameObject.GetComponent<Animal>().outline.OutlineColor = Color.yellow;
-                gameObject.GetComponent<Animal>().outline.OutlineWidth = 6f;
+                gameObject.GetComponent<Animal>().outline.OutlineWidth = 4f;
                 favourited = true;
                 if (!inFavourites)
                 {
@@ -85,7 +85,7 @@ public class AnimalSelection : MonoBehaviour
             gameObject.GetComponent<Animal>().outline.enabled = true;
             gameObject.GetComponent<Animal>().outline.OutlineMode = Outline.Mode.OutlineAll;
             gameObject.GetComponent<Animal>().outline.OutlineColor = new Color(255, 192, 0, 1);
-            gameObject.GetComponent<Animal>().outline.OutlineWidth = 6f;
+            gameObject.GetComponent<Animal>().outline.OutlineWidth = 3f;
             if (!inList)
             {
                 selectedAnimals.selectedAnimalsList.Add(gameObject);
@@ -95,7 +95,7 @@ public class AnimalSelection : MonoBehaviour
             {
                 gameObject.GetComponent<Animal>().outline.OutlineMode = Outline.Mode.OutlineAll;
                 gameObject.GetComponent<Animal>().outline.OutlineColor = Color.blue;
-                gameObject.GetComponent<Animal>().outline.OutlineWidth = 4f;
+                gameObject.GetComponent<Animal>().outline.OutlineWidth = 3f;
                 gameObject.GetComponent<Animal>().outline.enabled = false;
                 favourited = false; selected = true;
                 if (inFavourites)
@@ -119,7 +119,7 @@ public class AnimalSelection : MonoBehaviour
             gameObject.GetComponent<Animal>().outline.enabled = true;
             gameObject.GetComponent<Animal>().outline.OutlineMode = Outline.Mode.OutlineAll;
             gameObject.GetComponent<Animal>().outline.OutlineColor = Color.yellow;
-            gameObject.GetComponent<Animal>().outline.OutlineWidth = 6f;
+            gameObject.GetComponent<Animal>().outline.OutlineWidth = 3f;
             selectedAnimals.selectedAnimalsList.Remove(gameObject);
             inList = false;
         }
