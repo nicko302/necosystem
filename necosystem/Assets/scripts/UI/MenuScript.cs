@@ -39,6 +39,10 @@ public class MenuScript : MonoBehaviour
     [SerializeField] private bool menuFadeIn = false;
     [SerializeField] private bool genFadeIn = false;
 
+    [Header("SFX")]
+    public AudioSource audioSource;
+
+
     private string seed;
     private int x = -1;
     private int z = 1;
@@ -125,7 +129,7 @@ public class MenuScript : MonoBehaviour
     public void Play()
     {
         generatorGroup.SetActive(true);
-
+        audioSource.Play();
         menuCam.Priority = 0; //cut to genCam (priority is higher)
         genCam.Priority = 1;
 
@@ -135,6 +139,7 @@ public class MenuScript : MonoBehaviour
     public void Back()
     {
         menuGroup.SetActive(true);
+        audioSource.Play();
 
         menuCam.Priority = 1; //cut to menuCam
         genCam.Priority = 0;
@@ -144,17 +149,20 @@ public class MenuScript : MonoBehaviour
 
     public void Options()
     {
+        audioSource.Play();
         menuGroup.SetActive(false);
         optionsGroup.SetActive(true);
     }
     public void OptionsBack()
     {
+        audioSource.Play();
         menuGroup.SetActive(true);
         optionsGroup.SetActive(false);
     }
 
     public void OptionsFullscreen()
     {
+        audioSource.Play();
         if (Screen.fullScreenMode == FullScreenMode.ExclusiveFullScreen)
         {
             Screen.fullScreenMode = FullScreenMode.Windowed; // windowed
@@ -174,12 +182,14 @@ public class MenuScript : MonoBehaviour
 
     public void Exit()
     {
+        audioSource.Play();
         Application.Quit();
         //UnityEditor.EditorApplication.isPlaying = false;
     }
 
     public void RandomiseSeed() //seed randomiser
     {
+        audioSource.Play();
         int s = UnityEngine.Random.Range(1, 1000000000);
         string f = s.ToString();
         ReadInputSeed(f);

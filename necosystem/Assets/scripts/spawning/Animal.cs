@@ -74,7 +74,6 @@ public class Animal : MonoBehaviour
 
     [Header("Mating variables")]
     public bool isBaby = false;
-    private bool stoppedGrowing = false;
     public bool mateFound = false;
     public bool readyToMate = false;
     public bool mateConditionsMet = false;
@@ -283,10 +282,6 @@ public class Animal : MonoBehaviour
                     if (transform.localScale.x < 0.63)
                     {
                         transform.localScale += new Vector3(.04f, .04f, .04f);
-                    }
-                    else
-                    {
-                        stoppedGrowing = true;
                     }
 
                     timer = UnityEngine.Random.Range(minInterval, maxInterval); // reset the interval timer

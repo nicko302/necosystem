@@ -11,7 +11,6 @@ public class MouseToSpawnAnimal : MonoBehaviour
     public GameObject foxPrefab;
     private Animal animal;
 
-
     private void Start()
     {
         buttonController = GameObject.Find("ButtonController").GetComponent<ButtonController>();

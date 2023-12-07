@@ -13,9 +13,12 @@ public class AnimalSelection : MonoBehaviour
     public bool inFavourites;
     private GameObject selectedAnimalsObj;
     private SelectedAnimals selectedAnimals;
+    private GameObject sfx;
+    private AudioSource sfxAudio;
 
     private void OnMouseUpAsButton()
     {
+        sfxAudio.Play();
         if (gameObject.GetComponent<Rabbit>() != null && selected == false)
         {
             Debug.Log("rabbit clicked");
@@ -141,5 +144,7 @@ public class AnimalSelection : MonoBehaviour
     {
         selectedAnimalsObj = GameObject.Find("Selected Animals");
         selectedAnimals = selectedAnimalsObj.GetComponent<SelectedAnimals>();
+        sfx = GameObject.Find("SFX");
+        sfxAudio = sfx.GetComponent<AudioSource>();
     }
 }

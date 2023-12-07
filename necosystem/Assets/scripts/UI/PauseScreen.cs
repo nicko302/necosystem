@@ -7,7 +7,7 @@ public class PauseScreen : MonoBehaviour
 {
     [SerializeField] GameObject pauseMenu;
     [SerializeField] bool isPaused;
-    public SaveGame saveGame;
+    [SerializeField] AudioSource audioSource;
     public bool GetIsPaused() {  return isPaused; }
 
     private void Awake()
@@ -19,6 +19,7 @@ public class PauseScreen : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            audioSource.Play();
             if (isPaused)
             {
                 Resume();

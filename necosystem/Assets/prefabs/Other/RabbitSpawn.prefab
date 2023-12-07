@@ -49,6 +49,7 @@ MonoBehaviour:
   interactableLayer:
     serializedVersion: 2
     m_Bits: 128
+  audioSource: {fileID: 0}
   rabbitPrefab: {fileID: 7151781954798594762, guid: 32abe8a7b1d986043bf1d8c5e7b6bca4, type: 3}
   foxPrefab: {fileID: 7151781954798594762, guid: 0f16efeb27c1ada4eac5765dfe231430, type: 3}
 --- !u!1 &2778267244299909013
