@@ -52,7 +52,6 @@ public class Fox : Animal
     [ContextMenu("R - Eat food")]
     public override void EatFood() //destroys/eats grass object
     {
-        Debug.Log("EatFood");
         if (nearestFoodItem == null)
         {
             StopCoroutine("FollowPath");
@@ -100,7 +99,6 @@ public class Fox : Animal
             animator.SetBool("Walking", true);
             animator.SetBool("Eat", false);
 
-            Debug.Log("JAJAJAJAJA");
             canWander = false; moving = true;
             StartCoroutine(UpdatePath());
         }
@@ -138,7 +136,6 @@ public class Fox : Animal
 
         if (allPotentialMates.Count == 0)
         {
-            Debug.Log("No mate found");
             return;
         }
 
@@ -152,7 +149,6 @@ public class Fox : Animal
 
             if (distance < nearestDistance)
             {
-                Debug.Log("Mate found");
                 nearestMate = allPotentialMates[i];
                 nearestDistance = distance;
             }
@@ -163,7 +159,6 @@ public class Fox : Animal
     {
         StopCoroutine("FollowPath");
 
-        Debug.Log("mating...");
         libido = 100;
         mateFound = false;
 

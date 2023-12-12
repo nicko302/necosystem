@@ -34,27 +34,21 @@ public class Rabbit : Animal
     [ContextMenu("R - Eat food")]
     public override void EatFood() //destroys/eats grass object
     {
-        Debug.Log("EatFood");
         this.gameObject.GetComponent<Rabbit>().GetClosestFood();
 
-            Debug.Log("NearestDistance < 5");
+        isFindingFood = false;
+        isHungry = false;
 
-            isFindingFood = false;
-            isHungry = false;
+        if (nearestFoodItem != null)
+        {
+            Destroy(nearestFoodItem.transform.parent.gameObject);
+        }
 
-            Debug.Log("destroying grass");
-            if (nearestFoodItem != null)
-            {
-                Destroy(nearestFoodItem.transform.parent.gameObject);
-            }
-            //nearestFoodItem.transform.parent.position = new Vector3(nearestFoodItem.transform.parent.position.x, 200, nearestFoodItem.transform.parent.position.z);
-            Debug.Log("grass destroyed");
+        this.gameObject.GetComponent<Animal>().health = 100;
 
-            this.gameObject.GetComponent<Animal>().health = 100;
-
-            animator.SetBool("Eat", false);
-            animator.SetBool("Walking", false);
-            moving = false; canWander = true;
+        animator.SetBool("Eat", false);
+        animator.SetBool("Walking", false);
+        moving = false; canWander = true;
     }
     #endregion
 
@@ -84,7 +78,6 @@ public class Rabbit : Animal
 
         if (allPotentialMates.Count == 0)
         {
-            Debug.Log("No mate found");
             return;
         }
 
@@ -98,7 +91,6 @@ public class Rabbit : Animal
 
             if (distance < nearestDistance)
             {
-                Debug.Log("Mate found");
                 nearestMate = allPotentialMates[i];
                 nearestDistance = distance;
             }
@@ -109,7 +101,6 @@ public class Rabbit : Animal
     {
         StopCoroutine("FollowPath");
 
-        Debug.Log("mating...");
         libido = 100;
         mateFound = false;
 

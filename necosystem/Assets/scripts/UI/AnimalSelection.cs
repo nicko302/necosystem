@@ -21,23 +21,19 @@ public class AnimalSelection : MonoBehaviour
         sfxAudio.Play();
         if (gameObject.GetComponent<Rabbit>() != null && selected == false)
         {
-            Debug.Log("rabbit clicked");
             selected = true;
         }
         else if (gameObject.GetComponent<Rabbit>() != null && selected == true)
         {
-            Debug.Log("rabbit unclicked");
             selected = false;
         }
 
         if (gameObject.GetComponent<Fox>() != null && selected == false)
         {
-            Debug.Log("fox clicked");
             selected = true;
         }
         else if (gameObject.GetComponent<Fox>() != null && selected == true)
         {
-            Debug.Log("fox unclicked");
             selected = false;
         }
     }
