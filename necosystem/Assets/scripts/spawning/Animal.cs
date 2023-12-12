@@ -206,8 +206,7 @@ public class Animal : MonoBehaviour
     {
         runOnce = false;
         animator.SetBool("Walking", false);
-        Invoke("EatFood", 3);
-        Mate();
+        Invoke("Mate", 3);
     }
 
     #endregion
