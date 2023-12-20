@@ -109,7 +109,7 @@ public class TerrainGeneration : MonoBehaviour
 
         MapData mapData;
         public terrainData terrainData;
-        ObjectNoise objectNoise;
+        ObjectSpawn objectNoise;
         bool mapDataReceived;
         int previousLODIndex = -1;
         bool hasSetCollider;

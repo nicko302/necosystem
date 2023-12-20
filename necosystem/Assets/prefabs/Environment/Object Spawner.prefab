@@ -151,10 +151,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   newGrassPrefab: {fileID: 2773035970622090705, guid: c3e1e63ebc3e6cf45ba127d53f7498ef, type: 3}
   allGrass: []
-  objectNoise: {fileID: 4334190257550604237}
+  objectSpawn: {fileID: 4334190257550604237}
   timer: 0
   minInterval: 15
-  maxInterval: 25
+  maxInterval: 20
   canRegrow: 0
 --- !u!1 &4334190257630463648
 GameObject:

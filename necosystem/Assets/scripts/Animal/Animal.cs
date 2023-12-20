@@ -39,20 +39,26 @@ public class Animal : MonoBehaviour
 
 
     [Header("Pathfinding variables")]
+    [SerializeField]
+    protected float minInterval;
+    [SerializeField]
+    protected float maxInterval;
+    [SerializeField]
+    protected float timer;
     public Vector3 target;
     public float dstFromTarget;
     public float oldDstFromTarget;
     public Vector3 comparePos = Vector3.zero;
     public float dstFromComparePos;
-    public float oldDstFromComparePos;
+    protected float oldDstFromComparePos;
     public float dstFromComparePos1;
-    public float oldDstFromComparePos1;
+    protected float oldDstFromComparePos1;
     public float movementCheckTimer;
     public float pathfindTimeElapsed = 50f;
-    public bool repeatForMate = true;
-    public bool repeatForFood = true;
+    protected bool repeatForMate = true;
+    protected bool repeatForFood = true;
 
-    public bool exceptionCaught;
+    protected bool exceptionCaught;
 
     protected const float pathUpdateMoveThreshold = .5f;
     protected const float minPathUpdateTime = .2f;
@@ -89,11 +95,7 @@ public class Animal : MonoBehaviour
     [Tooltip("X / 10,000 chance to wander")]
     protected int chance = 1;
     protected int randNum = 0;
-    [SerializeField]
-    protected float minInterval;
-    [SerializeField]
-    protected float maxInterval;
-    protected float timer;
+    
 
     [SerializeField]
     protected float boundSize = 240f;

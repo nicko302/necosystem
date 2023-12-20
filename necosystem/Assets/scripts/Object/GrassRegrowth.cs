@@ -10,7 +10,7 @@ public class GrassRegrowth : MonoBehaviour
 {
     public GameObject newGrassPrefab;
     public List<GameObject> allGrass = new List<GameObject>();
-    public ObjectNoise objectNoise;
+    public ObjectSpawn objectSpawn;
 
     [Header("Grass regrowth")]
     [SerializeField]
@@ -42,7 +42,7 @@ public class GrassRegrowth : MonoBehaviour
 
     void GrassRegrow()
     {
-        allGrass = objectNoise.allGrass;
+        allGrass = objectSpawn.allGrass;
 
         // instantiate grass object & assign scale and rotation
         grassPrefab = newGrassPrefab;

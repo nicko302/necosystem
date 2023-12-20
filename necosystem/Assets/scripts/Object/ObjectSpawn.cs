@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using System;
 using Unity.VisualScripting;
 
-public class ObjectNoise : MonoBehaviour
+public class ObjectSpawn : MonoBehaviour
 {
     public static int chunkSizeIndex = 8;
 
